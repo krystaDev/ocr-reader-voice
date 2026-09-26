@@ -40,6 +40,7 @@ import kotlin.math.roundToInt
 @Composable
 fun DiagnosticsScreen(vm: MainViewModel, onClose: () -> Unit) {
     val state by vm.diagnostics.state.collectAsStateWithLifecycle()
+    val recorder by vm.recorder.state.collectAsStateWithLifecycle()
     var config by remember { mutableStateOf(vm.config) }
     fun update(change: (AutoReadConfig) -> AutoReadConfig) {
         val updated = try {
@@ -64,6 +65,12 @@ fun DiagnosticsScreen(vm: MainViewModel, onClose: () -> Unit) {
         Info("Wersja ${BuildConfig.VERSION_NAME}")
         Info("Start → pierwsza klatka: ${state.firstFrameMs?.let { "$it ms" } ?: "–"}")
         Info("Start → pierwsza mowa: ${state.firstSpeechMs?.let { "$it ms" } ?: "–"}")
+
+        Title("Nagrywanie klatek")
+        Info("Zapisuje tylko rozpoznany tekst i ramki (bez obrazów) – do strojenia auto-odczytu. Klatek: ${recorder.frames}")
+        BigToggle("NAGRYWAJ", if (recorder.recording) "WŁ." else "WYŁ.", recorder.recording, { vm.setRecording(!recorder.recording) }, Modifier.fillMaxWidth())
+        BigButton("UDOSTĘPNIJ NAGRANIE", vm::shareRecording, modifier = Modifier.fillMaxWidth())
+        BigButton("WYCZYŚĆ NAGRANIE", { vm.recorder.clear() }, modifier = Modifier.fillMaxWidth())
 
         Title("Parametry auto-odczytu")
         Stepper("Czas bezruchu", "${config.stableWindowMs} ms", { update { it.copy(stableWindowMs = it.stableWindowMs - 250) } }, { update { it.copy(stableWindowMs = it.stableWindowMs + 250) } })

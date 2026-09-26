@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Nagrania klatek (sam tekst i ramki, bez obrazów) udostępniane z ekranu Diagnostyka. -->
+    <cache-path name="recordings" path="recordings/" />
+</paths>

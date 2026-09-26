@@ -4,6 +4,8 @@ Aplikacja Android, która czyta na głos tekst widoczny w aparacie – opcjonaln
 
 - Wymagania produktu: [docs/PRD-MVP.md](docs/PRD-MVP.md)
 - Specyfikacja techniczna: [docs/TECH-SPEC.md](docs/TECH-SPEC.md)
+- Instalacja wersji testowej: [docs/INSTALACJA.md](docs/INSTALACJA.md)
+- Zestaw testowy i nagrania: [testdata/README.md](testdata/README.md), szablon testu: [docs/tests/](docs/tests/)
 
 ## Budowanie
 

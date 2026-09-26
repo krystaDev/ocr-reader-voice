@@ -14,6 +14,7 @@ mlkitTextRecognition = "16.0.1"
 mlkitLanguageId = "17.0.6"
 mlkitTranslate = "17.0.3"
 kotlinxCoroutines = "1.11.0"
+kotlinxSerialization = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -36,6 +37,7 @@ mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "ml
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkitTranslate" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junitBom" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
@@ -43,3 +45,4 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

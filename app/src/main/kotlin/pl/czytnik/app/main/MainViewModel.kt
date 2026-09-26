@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import pl.czytnik.app.camera.CameraSession
 import pl.czytnik.app.camera.TextFrameAnalyzer
 import pl.czytnik.app.diagnostics.Diagnostics
+import pl.czytnik.app.diagnostics.FrameRecorder
 import pl.czytnik.app.feedback.Haptics
 import pl.czytnik.app.feedback.StartSignal
 import pl.czytnik.app.language.MlKitLanguageIdentifier
@@ -85,6 +86,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val camera = CameraSession(application)
     val diagnostics = Diagnostics(SystemClock.elapsedRealtime())
+    val recorder = FrameRecorder()
 
     @Volatile
     private var analysisPaused = true
@@ -162,6 +164,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun onFaster() = dispatch(MainEvent.FasterPressed)
     fun onTorchToggled() = dispatch(MainEvent.TorchToggled)
     fun onRetry() = dispatch(MainEvent.RetryPressed)
+    fun setRecording(on: Boolean) = recorder.setRecording(on, now())
+
+    fun shareRecording() {
+        viewModelScope.launch {
+            val intent = recorder.shareIntent(getApplication()) ?: return@launch
+            getApplication<Application>().startActivity(intent)
+        }
+    }
+
     fun setAutoRead(enabled: Boolean) = dispatch(MainEvent.AutoReadChanged(enabled))
     fun setAutoTorch(enabled: Boolean) = dispatch(MainEvent.AutoTorchChanged(enabled))
     fun setTargetLanguage(language: LanguageTag) = dispatch(MainEvent.TargetLanguageChanged(language))
@@ -212,6 +223,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun onFrame(frame: OcrFrame) {
         if (analysisPaused) return
         diagnostics.frame(now())
+        recorder.onFrame(frame, now())
         _ui.update { it.copy(blocks = frame.blocks.map { block -> block.box }) }
         execute(controller.onFrame(frame, now()))
     }
