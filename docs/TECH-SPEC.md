@@ -199,6 +199,12 @@ fun reduce(state: MainState, event: MainEvent, now: Long, config: AutoReadConfig
 
 Czas jest parametrem (`now`), nie odczytem zegara – testy są deterministyczne.
 
+Implementacja (etap 1): reduktor (`MainReducer`) jest czysty i operuje na zdarzeniach wysokiego poziomu
+(`TextStable`, `ScreenTapped`, `ReadingPrepared`…). Stanowy `AutoReadEngine` (filtr, stabilność, pamięć, wskazówki)
+zamienia klatki na takie zdarzenia. `MainController` łączy oba: platforma przekazuje mu zdarzenia i klatki
+(`dispatch`, `onFrame`, `onScreenTapped`) i wykonuje zwrócone efekty; efekt `MarkRead` i wznowienie pamięci po
+przerwie w analizie obsługuje sam kontroler.
+
 ---
 
 ## 3. Algorytm auto-odczytu
@@ -222,7 +228,8 @@ Dla każdej klatki analizy:
 Kadr jest stabilny, gdy przez `STABLE_WINDOW_MS` wszystkie kolejne klatki analizy (min. `STABLE_MIN_FRAMES`) spełniają:
 
 - podobieństwo połączonego tekstu pełnych bloków do poprzedniej klatki ≥ `STABLE_SIMILARITY`,
-- środek prostokąta obejmującego wszystkie pełne bloki przesunął się o ≤ `MAX_CENTER_SHIFT` (ułamek przekątnej kadru),
+- środek prostokąta obejmującego wszystkie pełne bloki przesunął się o ≤ `MAX_CENTER_SHIFT` (ułamek przekątnej kadru)
+  **względem początku okna** (nie poprzedniej klatki – inaczej powolne przesuwanie telefonu uchodziłoby za bezruch),
 - zestaw pełnych bloków zawiera co najmniej jeden **nieprzeczytany** blok (zob. 3.3).
 
 Każda klatka łamiąca warunek zeruje okno. Brak czujników ruchu w MVP – tekst i jego położenie wystarczają; jeśli testy
@@ -236,7 +243,10 @@ pokażą fałszywe starty podczas przesuwania telefonu, dodamy żyroskop jako do
 - **Blok jest przeczytany**, gdy Dice z którymś wpisem ≥ `SAME_BLOCK_SIMILARITY` **lub** ≥ `CONTAINMENT` jego trigramów
   zawiera się we wpisie (ML Kit czasem dzieli jeden dymek na dwa bloki albo scala dwa w jeden).
 - **Blok jest nadal widoczny** (aktualizuje `lastSeenAt`), gdy podobieństwo ≥ `PRESENT_SIMILARITY` – niższy próg niż
-  wyżej (histereza), żeby częściowo zasłonięty lub ucięty dymek nadal „trzymał” blokadę.
+  wyżej (histereza), żeby częściowo zasłonięty lub ucięty dymek nadal „trzymał” blokadę. Ucięty blok zawarty we wpisie
+  też go podtrzymuje; pełny blok – tylko gdy stanowi ≥ 30% wpisu (inaczej krótki nowy dymek „WAIT!” podtrzymywałby
+  dawny dymek, w którym padło to słowo, i sam zostałby uznany za przeczytany).
+- Zawieranie przy ocenie „przeczytany” sprawdzamy tylko względem wpisów widocznych w bieżącym kadrze.
 - **Ponowne uzbrojenie**: wpis jest usuwany, gdy blok nie był widoczny przez `LEAVE_MS`. Wtedy powrót aparatu do tego
   dymka przeczyta go ponownie – to świadomy powrót (PRD: „dopóki aparat go nie opuści”).
 - **Pauza zegara**: podczas `Processing`/`Speaking` analiza jest wstrzymana, więc przy wznowieniu **wszystkim wpisom
@@ -269,7 +279,7 @@ nowego APK.
 | `ANALYSIS_INTERVAL_MS` | 350 | PRD |
 | `STABLE_WINDOW_MS` | 1000 | PRD „ok. 1 s” |
 | `STABLE_MIN_FRAMES` | 3 | |
-| `STABLE_SIMILARITY` | 0,85 | |
+| `STABLE_SIMILARITY` | 0,75 | obniżone z 0,85 w etapie 1: jeden błędny znak OCR w krótkim dymku daje podobieństwo ok. 0,83 |
 | `MAX_CENTER_SHIFT` | 0,08 | ułamek przekątnej |
 | `MIN_LETTERS` | 3 | komiksowe „NO!” ma 2 litery – do sprawdzenia; wymuszony odczyt nie ma limitu |
 | `LINE_MIN_CONFIDENCE` | 0,5 | |
@@ -606,7 +616,7 @@ Kolejność ustawiona tak, żeby Damian dostał działające APK z polskim przek
 | Etap | Zakres | Kryteria ukończenia |
 | --- | --- | --- |
 | **0. Szkielet i CI** | Projekt Gradle (`core` + `app`), katalog wersji, pusta aktywność Compose z motywem, workflow CI, debug keystore | Zielony CI na gałęzi; artefakt APK instaluje się i uruchamia na telefonie; `./gradlew -p core test` przechodzi w chmurze |
-| **1. Logika rdzenia (JVM)** | `model`, `text`, `autoread`, `language`, `state`, `pipeline` na portach + testy z rozdz. 6.1 (bez sekwencji z nagrań) | Wszystkie testy `core` zielone; reduktor pokrywa tabelę 2.3; symulacja „4 dymki” na syntetycznych klatkach – każdy przeczytany raz |
+| **1. Logika rdzenia (JVM)** ✅ | `model`, `text`, `autoread`, `language`, `state`, `pipeline` na portach + testy z rozdz. 6.1 (bez sekwencji z nagrań) | Wszystkie testy `core` zielone; reduktor pokrywa tabelę 2.3; symulacja „4 dymki” na syntetycznych klatkach – każdy przeczytany raz |
 | **2. APK #1 dla Damiana: czyta po angielsku i po polsku** | CameraX (podgląd + analiza + zdjęcie), OCR łaciński, TTS z doborem głosu, auto-odczyt, dotknięcie = stop/czytaj teraz, Powtórz, wibracje, sygnał, podstawowe komunikaty, uprawnienie. **Proste tłumaczenie**: przełącznik Tłumacz (+ ponowny odczyt tego samego tekstu), stała para EN→PL, jednorazowe pobranie modelu PL z komunikatem głosowym. Ekran Diagnostyka: parametry, czasy, **tekst przed i po tłumaczeniu** (żeby odróżnić błąd OCR od błędu przekładu) | Scenariusz Damiana w całości na urządzeniu dewelopera; model PL po pobraniu działa w trybie samolotowym; APK wysłane Damianowi; **zebrane zdjęcia i sekwencje z jego tabletu** (poza repo) |
 | **3. Tłumaczenie – dopracowanie** | Language ID z fallbackiem dla krótkich dymków (zamiast stałej pary EN→PL), normalizacja WIELKICH LITER (przełączalna), brak sieci / ponawianie pobierania, język docelowy w ustawieniach, modele źródłowe innych języków | Czas ≤ 7 s (p75) na telefonie Damiana; porównanie z/bez normalizacji WIELKICH LITER na jego materiałach; APK #2 dla Damiana |
 | **4. Strojenie na danych Damiana** | Sekwencje z etapu 2 jako testy w `core`; korekta parametrów; decyzja D7 (zdjęcie vs klatka analizy) i D6 (WIELKIE LITERY) na podstawie pomiarów; ekspozycja/mora | 0 niechcianych powtórzeń i 0 fałszywych startów na nagranych sekwencjach; decyzje zapisane w tym dokumencie |

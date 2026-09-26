@@ -9,7 +9,7 @@ data class AutoReadConfig(
     val analysisIntervalMs: Long = 350,
     val stableWindowMs: Long = 1000,
     val stableMinFrames: Int = 3,
-    val stableSimilarity: Double = 0.85,
+    val stableSimilarity: Double = 0.75,
     val maxCenterShift: Double = 0.08,
     val minLetters: Int = 3,
     val lineMinConfidence: Double = 0.5,
@@ -29,6 +29,13 @@ data class AutoReadConfig(
     val normalizeAllCaps: Boolean = true,
     val lowLightLuma: Int = 40,
     val lowLightMs: Long = 2000,
+    val languageMinConfidence: Double = 0.5,
+    val speechChunkMaxChars: Int = 500,
+    val paragraphPauseMs: Long = 350,
+    val minSpeechRate: Double = 0.5,
+    val maxSpeechRate: Double = 2.0,
+    val speechRateStep: Double = 0.25,
+    val backgroundForgetMs: Long = 60_000,
 ) {
     init {
         require(analysisIntervalMs > 0) { "analysisIntervalMs must be positive" }
@@ -42,6 +49,7 @@ data class AutoReadConfig(
             "sameBlockSimilarity" to sameBlockSimilarity,
             "containment" to containment,
             "presentSimilarity" to presentSimilarity,
+            "languageMinConfidence" to languageMinConfidence,
         )) {
             require(value in 0.0..1.0) { "$name must be in 0..1, was $value" }
         }
@@ -50,5 +58,8 @@ data class AutoReadConfig(
         }
         require(lowLightLuma in 0..255) { "lowLightLuma must be in 0..255" }
         require(memoryMaxEntries >= 1) { "memoryMaxEntries must be at least 1" }
+        require(speechChunkMaxChars >= 50) { "speechChunkMaxChars must be at least 50" }
+        require(minSpeechRate in 0.1..maxSpeechRate) { "minSpeechRate must be in 0.1..maxSpeechRate" }
+        require(speechRateStep > 0) { "speechRateStep must be positive" }
     }
 }
