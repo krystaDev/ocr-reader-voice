@@ -1,69 +1,90 @@
 package pl.czytnik.app
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.czytnik.app.main.DiagnosticsScreen
+import pl.czytnik.app.main.MainScreen
+import pl.czytnik.app.main.MainViewModel
+import pl.czytnik.app.main.UiCommand
 import pl.czytnik.app.ui.theme.CzytnikTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // PRD: ekran nie gaśnie podczas pracy aplikacji; klawisze głośności sterują mową.
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        volumeControlStream = AudioManager.STREAM_MUSIC
+
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) = viewModel.onStart(hasCameraPermission())
+            override fun onStop(owner: LifecycleOwner) = viewModel.onStop()
+        })
+
         setContent {
             CzytnikTheme {
-                SkeletonScreen(versionName = BuildConfig.VERSION_NAME)
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                    App(viewModel)
+                }
             }
         }
     }
-}
 
-@Composable
-private fun SkeletonScreen(versionName: String) {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(
-            modifier = Modifier
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.semantics { heading() },
-            )
-            Text(
-                text = stringResource(R.string.skeleton_message),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                text = stringResource(R.string.version_label, versionName),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+    private fun hasCameraPermission() =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+
+    @Composable
+    private fun App(vm: MainViewModel) {
+        val ui by vm.ui.collectAsStateWithLifecycle()
+        var showDiagnostics by rememberSaveable { mutableStateOf(false) }
+        val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            vm.onPermissionResult(granted)
+        }
+        LaunchedEffect(vm) {
+            vm.commands.collect { command ->
+                when (command) {
+                    UiCommand.RequestCameraPermission -> permissionLauncher.launch(Manifest.permission.CAMERA)
+                    UiCommand.OpenAppSettings -> startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)),
+                    )
+                }
+            }
+        }
+        if (showDiagnostics) {
+            BackHandler { showDiagnostics = false }
+            DiagnosticsScreen(vm, onClose = { showDiagnostics = false })
+        } else {
+            MainScreen(ui, vm, onOpenDiagnostics = { showDiagnostics = true })
         }
     }
-}
-
-@Preview(fontScale = 2f)
-@Composable
-private fun SkeletonScreenPreview() {
-    CzytnikTheme { SkeletonScreen(versionName = "0.0.1-local") }
 }

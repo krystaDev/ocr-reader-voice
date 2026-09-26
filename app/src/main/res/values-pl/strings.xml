@@ -1,6 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Czytnik Głosowy</string>
-    <string name="skeleton_message">Aplikacja jest w budowie. Czytanie tekstu pojawi się w następnej wersji.</string>
-    <string name="version_label">Wersja %1$s</string>
+
+    <string name="status_starting">Uruchamiam…</string>
+    <string name="status_searching">Szukam tekstu</string>
+    <string name="status_text_visible">Widzę tekst</string>
+    <string name="status_processing">Przygotowuję tekst…</string>
+    <string name="status_speaking">Czytam</string>
+    <string name="status_permission">Potrzebny aparat</string>
+    <string name="status_error">Coś poszło nie tak</string>
+
+    <string name="preview_description">Podgląd aparatu</string>
+    <string name="action_read_now">Czytaj teraz</string>
+    <string name="action_stop">Zatrzymaj</string>
+
+    <string name="button_repeat">POWTÓRZ</string>
+    <string name="button_translate">TŁUMACZ</string>
+    <string name="button_slower">WOLNIEJ</string>
+    <string name="button_faster">SZYBCIEJ</string>
+    <string name="button_torch">LATARKA</string>
+    <string name="button_diagnostics">DIAGNOSTYKA</string>
+    <string name="button_grant_access">UDZIEL DOSTĘPU</string>
+    <string name="button_open_settings">OTWÓRZ USTAWIENIA</string>
+    <string name="button_retry">SPRÓBUJ PONOWNIE</string>
+    <string name="state_on">WŁĄCZONE</string>
+    <string name="state_off">WYŁĄCZONE</string>
+    <string name="rate_state">Tempo %1$s</string>
+
+    <string name="msg_welcome_first">Czytnik gotowy. Skieruj aparat na tekst.</string>
+    <string name="msg_welcome">Gotowe.</string>
+    <string name="msg_permission_explanation">Aplikacja potrzebuje aparatu, żeby czytać tekst. Za chwilę pojawi się pytanie o zgodę.</string>
+    <string name="msg_permission_denied">Bez aparatu nie mogę czytać. Naciśnij Otwórz ustawienia.</string>
+    <string name="msg_no_text">Nie widzę tekstu.</string>
+    <string name="msg_hold_still">Trzymaj telefon nieruchomo.</string>
+    <string name="msg_move_away">Odsuń telefon.</string>
+    <string name="msg_stopped">Zatrzymano.</string>
+    <string name="msg_nothing_read_yet">Nic jeszcze nie przeczytałem.</string>
+    <string name="msg_reading_failed">Nie udało się odczytać tekstu.</string>
+    <string name="msg_translation_on">Tłumaczenie włączone.</string>
+    <string name="msg_translation_off">Tłumaczenie wyłączone.</string>
+    <string name="msg_downloading_translation">Pobieram tłumaczenie, język: %1$s. Około 30 MB.</string>
+    <string name="msg_translation_ready">Tłumaczenie gotowe.</string>
+    <string name="msg_no_internet">Brak internetu. Tłumaczenie niedostępne, czytam oryginał.</string>
+    <string name="msg_translation_failed">Tłumaczenie się nie udało, czytam oryginał.</string>
+    <string name="msg_reading_original_downloading">Czytam oryginał. Pobieram tłumaczenie, język: %1$s.</string>
+    <string name="msg_no_voice">Brak głosu, język: %1$s. Czytam głosem domyślnym.</string>
+    <string name="msg_torch_on">Latarka włączona.</string>
+    <string name="msg_torch_off">Latarka wyłączona.</string>
+    <string name="msg_auto_torch_on">Jest ciemno, włączam latarkę.</string>
+    <string name="msg_speech_rate">Tempo %1$s.</string>
+    <string name="msg_camera_unavailable">Nie mogę uruchomić aparatu.</string>
+    <string name="msg_no_speech_engine">Brak syntezatora mowy w telefonie. Zainstaluj Usługi mowy Google.</string>
 </resources>

@@ -1,6 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Czytnik Głosowy</string>
-    <string name="skeleton_message">The app is under construction. Reading text will be available in the next version.</string>
-    <string name="version_label">Version %1$s</string>
+
+    <string name="status_starting">Starting…</string>
+    <string name="status_searching">Looking for text</string>
+    <string name="status_text_visible">I see text</string>
+    <string name="status_processing">Preparing text…</string>
+    <string name="status_speaking">Reading</string>
+    <string name="status_permission">Camera needed</string>
+    <string name="status_error">Something went wrong</string>
+
+    <string name="preview_description">Camera preview</string>
+    <string name="action_read_now">Read now</string>
+    <string name="action_stop">Stop</string>
+
+    <string name="button_repeat">REPEAT</string>
+    <string name="button_translate">TRANSLATE</string>
+    <string name="button_slower">SLOWER</string>
+    <string name="button_faster">FASTER</string>
+    <string name="button_torch">TORCH</string>
+    <string name="button_diagnostics">DIAGNOSTICS</string>
+    <string name="button_grant_access">ALLOW CAMERA</string>
+    <string name="button_open_settings">OPEN SETTINGS</string>
+    <string name="button_retry">TRY AGAIN</string>
+    <string name="state_on">ON</string>
+    <string name="state_off">OFF</string>
+    <string name="rate_state">Speed %1$s</string>
+
+    <string name="msg_welcome_first">Reader ready. Point the camera at text.</string>
+    <string name="msg_welcome">Ready.</string>
+    <string name="msg_permission_explanation">The app needs the camera to read text. You will be asked for permission in a moment.</string>
+    <string name="msg_permission_denied">I cannot read without the camera. Press Open settings.</string>
+    <string name="msg_no_text">I don\'t see any text.</string>
+    <string name="msg_hold_still">Hold the phone still.</string>
+    <string name="msg_move_away">Move the phone further away.</string>
+    <string name="msg_stopped">Stopped.</string>
+    <string name="msg_nothing_read_yet">Nothing has been read yet.</string>
+    <string name="msg_reading_failed">Could not read the text.</string>
+    <string name="msg_translation_on">Translation on.</string>
+    <string name="msg_translation_off">Translation off.</string>
+    <string name="msg_downloading_translation">Downloading translation, language: %1$s. About 30 MB.</string>
+    <string name="msg_translation_ready">Translation ready.</string>
+    <string name="msg_no_internet">No internet. Translation unavailable, reading the original.</string>
+    <string name="msg_translation_failed">Translation failed, reading the original.</string>
+    <string name="msg_reading_original_downloading">Reading the original. Downloading translation, language: %1$s.</string>
+    <string name="msg_no_voice">No voice for language: %1$s. Reading with the default voice.</string>
+    <string name="msg_torch_on">Torch on.</string>
+    <string name="msg_torch_off">Torch off.</string>
+    <string name="msg_auto_torch_on">It is dark, turning the torch on.</string>
+    <string name="msg_speech_rate">Speed %1$s.</string>
+    <string name="msg_camera_unavailable">I cannot start the camera.</string>
+    <string name="msg_no_speech_engine">No speech engine on this phone. Install Speech Services by Google.</string>
 </resources>

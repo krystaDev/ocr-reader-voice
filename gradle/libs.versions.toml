@@ -8,6 +8,11 @@ androidxCore = "1.19.0"
 androidxActivityCompose = "1.13.0"
 androidxComposeBom = "2026.09.00"
 junitBom = "5.14.4"
+androidxLifecycle = "2.11.0"
+androidxCamera = "1.6.1"
+mlkitTextRecognition = "16.0.1"
+mlkitLanguageId = "17.0.6"
+mlkitTranslate = "17.0.3"
 kotlinxCoroutines = "1.11.0"
 
 [libraries]
@@ -20,6 +25,17 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "androidxCamera" }
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidxCamera" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "androidxCamera" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "androidxCamera" }
+mlkit-text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitTextRecognition" }
+mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "mlkitLanguageId" }
+mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkitTranslate" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junitBom" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
