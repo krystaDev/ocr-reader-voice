@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Czytnik Głosowy</string>
+    <string name="skeleton_message">The app is under construction. Reading text will be available in the next version.</string>
+    <string name="version_label">Version %1$s</string>
+</resources>

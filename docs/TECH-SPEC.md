@@ -22,7 +22,7 @@ Cel: **zero kliknięć** – telefon sam czyta nowy dymek po angielsku albo po p
 | D5 | Bloki ucięte krawędzią kadru są pomijane (gdy w kadrze jest też pełny blok) | Kawałek sąsiedniego dymka nie jest czytany; gdy wszystko jest ucięte → „Odsuń telefon” |
 | D6 | Tekst pisany WIELKIMI LITERAMI (komiksy) normalizujemy do zdań przed tłumaczeniem i TTS | Lepsza jakość tłumaczenia i wymowy; do weryfikacji na zestawie Damiana (przełącznik w kodzie) |
 | D7 | Zdjęcie wysokiej rozdzielczości przed odczytem – **włączone domyślnie, ale jako parametr** | PRD tego wymaga (F3); dla dużych liter na ekranie tabletu klatka analizy może wystarczyć i być szybsza – rozstrzygamy pomiarem |
-| D8 | Tłumaczenie: ML Kit Translation offline; model języka docelowego pobierany w chwili włączenia „Tłumacz” | Zgodnie z ustaleniami; Cloud Translation tylko, jeśli test z Damianem wypadnie źle |
+| D8 | Tłumaczenie: ML Kit Translation offline, przełącznik „Tłumacz” domyślnie włączony; model języka docelowego pobierany przy pierwszym uruchomieniu | Zgodnie z ustaleniami; Cloud Translation tylko, jeśli test z Damianem wypadnie źle |
 | D9 | Automatyczna latarka: domyślnie włączona, ale ręczne wyłączenie blokuje auto-włączanie do końca sesji + osobne ustawienie | Odblask na szkle tabletu |
 | D10 | Komunikaty stanu: przy włączonym TalkBack przez `liveRegion` (mówi TalkBack), bez TalkBack – nasz TTS. Treść czytanego tekstu zawsze naszym TTS | Brak podwójnej mowy |
 | D11 | CI: GitHub Actions buduje debug APK jako artefakt; **wspólny debug keystore w repozytorium** | Kolejne APK instalują się „na” poprzednie bez odinstalowania (inaczej Damian traci pobrany model i ustawienia) |
@@ -342,8 +342,8 @@ Wersje bibliotek – rozdz. 7.
   źródłowy ≠ docelowy **i** para wspierana przez ML Kit **i** oba modele są na urządzeniu.
 - Język docelowy: domyślnie język telefonu (F10), zmienny w ustawieniach (lista `TranslateLanguage.getAllLanguages()`).
 - **Pobieranie modeli** (`RemoteModelManager`):
-  - model **docelowy** (u Damiana PL, ok. 30 MB) pobieramy w chwili włączenia przełącznika Tłumacz lub zmiany języka
-    docelowego; komunikat „Pobieram tłumaczenie na polski, około 30 MB” i „Tłumaczenie gotowe”;
+  - przełącznik Tłumacz jest **domyślnie włączony** (decyzja 9.3 pkt 4); model **docelowy** (u Damiana PL, ok. 30 MB)
+    pobieramy przy pierwszym uruchomieniu, a później przy włączeniu przełącznika lub zmianie języka docelowego; komunikat „Pobieram tłumaczenie na polski, około 30 MB” i „Tłumaczenie gotowe”;
   - model angielski jest zawsze na urządzeniu;
   - model **źródłowy** innego języka (np. niemiecki) – pobierany przy pierwszym napotkaniu; ten odczyt idzie w oryginale
     z komunikatem „Czytam oryginał, pobieram tłumaczenie z niemieckiego”;
@@ -539,23 +539,22 @@ Wynik zapisujemy w `docs/tests/damian-YYYY-MM-DD.md` (bez zdjęć komiksów).
 
 ### 7.1 Narzędzia i wersje
 
-Wersje przypinamy w `gradle/libs.versions.toml` w etapie 0 na **najnowszych stabilnych** w dniu startu. Stan
-sprawdzony dziś: Kotlin 2.4.20, Gradle 9.8.0, kotlinx-coroutines 1.11.0 (Maven Central). Wersji AGP, CameraX,
-Compose BOM i ML Kit nie dało się sprawdzić z chmury (Google Maven zablokowany) – ustali je pierwszy build w CI.
+Wersje są przypięte w `gradle/libs.versions.toml` (etap 0). Wersje z Google Maven (niedostępnego z chmury) przyjęte
+za aktualnymi oficjalnymi przykładami Google (android/compose-samples, android/snippets) z września 2026.
 
 | Narzędzie | Wersja | Uwagi |
 | --- | --- | --- |
 | JDK (build) | 21 (Temurin) | toolchain; bytecode `jvmTarget = 17` |
-| Gradle | 9.8.x (wrapper) | |
-| Android Gradle Plugin | najnowsza stabilna 9.x | wbudowana obsługa Kotlina w AGP 9 – jeśli się potwierdzi, bez osobnego pluginu `kotlin-android` |
-| Kotlin | 2.4.x | + plugin kompilatora Compose |
-| compileSdk / targetSdk | 36 (Android 16) | targetSdk zgodny z wymaganiami Google Play na 2026; podniesiemy, jeśli stabilne jest już API 37 |
+| Gradle | 9.8.0 (wrapper) | |
+| Android Gradle Plugin | 9.3.1 | wbudowana obsługa Kotlina – bez pluginu `kotlin-android`; osobno tylko plugin kompilatora Compose |
+| Kotlin | 2.4.20 | + plugin kompilatora Compose 2.4.20 |
+| compileSdk / targetSdk | 37 / 36 | compileSdk 37 wymagane przez aktualne biblioteki AndroidX; targetSdk 36 zgodny z wymaganiami Google Play na 2026 |
 | minSdk | 26 (Android 8.0) | PRD |
-| Compose | BOM najnowszy stabilny, Material 3 | |
-| CameraX | 1.5.x (camera-core, camera2, lifecycle, view) | `PreviewView` przez `AndroidView` |
-| ML Kit | text-recognition 16.x (bundled), language-id 17.x, translate 17.x | |
+| Compose | BOM 2026.09.00, Material 3; activity-compose 1.13.0, core-ktx 1.19.0 | |
+| CameraX | 1.6.1 (camera-core, camera2, lifecycle, view) | `PreviewView` przez `AndroidView`; dodawane w etapie 2 |
+| ML Kit | text-recognition 16.x (bundled), language-id 17.x, translate 17.x | dokładne wersje w etapie 2 |
 | Pozostałe | lifecycle-viewmodel-compose, datastore-preferences, kotlinx-coroutines-play-services | |
-| Testy | JUnit 5 + kotlin.test (core); JUnit 4 + Compose UI test + Robolectric tylko jeśli potrzebny (app) | |
+| Testy | JUnit 5.14 + kotlin.test (core); JUnit 4 + Compose UI test + Robolectric tylko jeśli potrzebny (app) | |
 
 Rozmiar: bundled OCR łaciński + Language ID to kilka MB na ABI; uniwersalne debug APK szacunkowo 25–40 MB (limit PRD
 60 MB). Do Google Play – AAB (podział na ABI).
@@ -654,13 +653,16 @@ pracuje więcej niż jedna osoba.
 2. ~~Zdjęcia komiksów i dystrybucja~~ – **zdjęcia komiksów poza repo, APK dla Damiana przez link/mail** (2026-09-26,
    rozdz. 6.3 i 7.3).
 3. ~~Kolejność etapów~~ – **APK #1 z prostym tłumaczeniem EN→PL** (2026-09-26, rozdz. 8).
-4. **Domyślny stan przełącznika „Tłumacz”** – propozycja: wyłączony przy pierwszym uruchomieniu, potem zapamiętany
-   (Damian włącza raz).
+4. ~~Domyślny stan „Tłumacz”~~ – **włączony przy pierwszym uruchomieniu**, potem zapamiętany (2026-09-26). Model
+   PL pobierany przy pierwszym uruchomieniu, gdy język telefonu ≠ angielski.
 5. **Wynik testu Damiana z Tłumaczem Google offline** (PRD, kolejne kroki, pkt 2) – jeśli negatywny, zanim zaczniemy
    etap 3 trzeba zdecydować o Cloud Translation (klucz API, koszty, prywatność, zmiana PRD).
-6. **Wybór dymka dotknięciem (pomysł Damiana z Lookout)** – zob. 9.4.
+6. ~~Wybór dymka dotknięciem~~ – **nie robimy**: aplikacja czyta to, co jest w kadrze (2026-09-26, zob. 9.4).
 
-### 9.4 Propozycja: wybór dymka dotknięciem (inspiracja: Lookout)
+### 9.4 Propozycja: wybór dymka dotknięciem (inspiracja: Lookout) – odrzucona
+
+**Decyzja (2026-09-26): nie robimy.** Aplikacja czyta to, co jest w kadrze; o tym, co zostanie przeczytane, decyduje
+skierowanie aparatu. Analiza poniżej zostaje dla kontekstu.
 
 Damian zwrócił uwagę na aplikację Google Lookout, w której można wskazać na ekranie, co dokładnie ma zostać
 przetłumaczone. Do potwierdzenia z Damianem, o którą funkcję dokładnie chodzi i w jakiej sytuacji jej potrzebuje
