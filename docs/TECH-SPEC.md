@@ -686,5 +686,9 @@ Zastrzeżenia:
   zamrożonego kadru jako listę elementów.
 
 **Rekomendacja:** wariant A od razu w APK #1 (koszt mały, a sprawdzimy, czy Damian z tego korzysta); wariant B dopiero,
-jeśli test pokaże potrzebę. Warto też, żeby Damian porównał sam Lookout na swoim tablecie – jeśli spełnia jego potrzeby,
-to ważna informacja dla całego projektu.
+jeśli test pokaże potrzebę.
+
+**Lookout a nasza aplikacja** (informacja od Damiana, 2026-09-26): Lookout czyta tekst, ale **nie tłumaczy**. To
+potwierdza, że dla Damiana kluczową wartością naszej aplikacji jest połączenie: automatyczny odczyt + tłumaczenie
+EN→PL. Z Lookout warto przejąć sposób wskazywania fragmentu tekstu (wariant A/B) – do obejrzenia z Damianem, jak
+wygląda to w praktyce.
