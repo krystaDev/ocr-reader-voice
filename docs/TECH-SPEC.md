@@ -654,11 +654,11 @@ pracuje więcej niż jedna osoba.
 2. ~~Zdjęcia komiksów i dystrybucja~~ – **zdjęcia komiksów poza repo, APK dla Damiana przez link/mail** (2026-09-26,
    rozdz. 6.3 i 7.3).
 3. ~~Kolejność etapów~~ – **APK #1 z prostym tłumaczeniem EN→PL** (2026-09-26, rozdz. 8).
-6. **Wybór dymka dotknięciem (pomysł Damiana z Lookout)** – zob. 9.4.
 4. **Domyślny stan przełącznika „Tłumacz”** – propozycja: wyłączony przy pierwszym uruchomieniu, potem zapamiętany
    (Damian włącza raz).
 5. **Wynik testu Damiana z Tłumaczem Google offline** (PRD, kolejne kroki, pkt 2) – jeśli negatywny, zanim zaczniemy
    etap 3 trzeba zdecydować o Cloud Translation (klucz API, koszty, prywatność, zmiana PRD).
+6. **Wybór dymka dotknięciem (pomysł Damiana z Lookout)** – zob. 9.4.
 
 ### 9.4 Propozycja: wybór dymka dotknięciem (inspiracja: Lookout)
 
