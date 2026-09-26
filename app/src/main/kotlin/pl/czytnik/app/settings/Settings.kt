@@ -3,6 +3,7 @@ package pl.czytnik.app.settings
 import android.content.Context
 import androidx.core.content.edit
 import pl.czytnik.core.config.AutoReadConfig
+import pl.czytnik.core.model.LanguageTag
 import pl.czytnik.core.state.MainState
 
 /** Ustawienia zapamiętywane między uruchomieniami. */
@@ -10,9 +11,11 @@ class Settings(context: Context) {
 
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
-    fun initialState(): MainState {
+    /** @param defaultTarget język tłumaczenia, gdy użytkownik go nie wybrał (F10: język telefonu) */
+    fun initialState(defaultTarget: LanguageTag): MainState {
         val defaults = MainState()
         return defaults.copy(
+            targetLanguage = prefs.getString(TARGET_LANGUAGE, null)?.let(::LanguageTag) ?: defaultTarget,
             translate = prefs.getBoolean(TRANSLATE, defaults.translate),
             speechRate = prefs.getFloat(SPEECH_RATE, defaults.speechRate.toFloat()).toDouble(),
             autoRead = prefs.getBoolean(AUTO_READ, defaults.autoRead),
@@ -23,6 +26,7 @@ class Settings(context: Context) {
 
     fun save(state: MainState) = prefs.edit {
         putBoolean(TRANSLATE, state.translate)
+        putString(TARGET_LANGUAGE, state.targetLanguage.code)
         putFloat(SPEECH_RATE, state.speechRate.toFloat())
         putBoolean(AUTO_READ, state.autoRead)
         putBoolean(AUTO_TORCH, state.autoTorch)
@@ -59,6 +63,7 @@ class Settings(context: Context) {
 
     private companion object {
         const val TRANSLATE = "translate"
+        const val TARGET_LANGUAGE = "target_language"
         const val SPEECH_RATE = "speech_rate"
         const val AUTO_READ = "auto_read"
         const val AUTO_TORCH = "auto_torch"

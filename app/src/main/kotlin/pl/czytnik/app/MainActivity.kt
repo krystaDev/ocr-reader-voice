@@ -30,10 +30,14 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.czytnik.app.main.DiagnosticsScreen
+import pl.czytnik.app.main.LanguagePickerScreen
+import pl.czytnik.app.main.SettingsScreen
 import pl.czytnik.app.main.MainScreen
 import pl.czytnik.app.main.MainViewModel
 import pl.czytnik.app.main.UiCommand
 import pl.czytnik.app.ui.theme.CzytnikTheme
+
+private enum class Destination { MAIN, SETTINGS, LANGUAGE, DIAGNOSTICS }
 
 class MainActivity : ComponentActivity() {
 
@@ -66,7 +70,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun App(vm: MainViewModel) {
         val ui by vm.ui.collectAsStateWithLifecycle()
-        var showDiagnostics by rememberSaveable { mutableStateOf(false) }
+        var destination by rememberSaveable { mutableStateOf(Destination.MAIN) }
         val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             vm.onPermissionResult(granted)
         }
@@ -80,11 +84,26 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        if (showDiagnostics) {
-            BackHandler { showDiagnostics = false }
-            DiagnosticsScreen(vm, onClose = { showDiagnostics = false })
-        } else {
-            MainScreen(ui, vm, onOpenDiagnostics = { showDiagnostics = true })
+        when (destination) {
+            Destination.MAIN -> MainScreen(ui, vm, onOpenSettings = { destination = Destination.SETTINGS })
+            Destination.SETTINGS -> {
+                BackHandler { destination = Destination.MAIN }
+                SettingsScreen(
+                    ui = ui,
+                    vm = vm,
+                    onClose = { destination = Destination.MAIN },
+                    onChooseLanguage = { destination = Destination.LANGUAGE },
+                    onOpenDiagnostics = { destination = Destination.DIAGNOSTICS },
+                )
+            }
+            Destination.LANGUAGE -> {
+                BackHandler { destination = Destination.SETTINGS }
+                LanguagePickerScreen(ui, vm, onClose = { destination = Destination.SETTINGS })
+            }
+            Destination.DIAGNOSTICS -> {
+                BackHandler { destination = Destination.SETTINGS }
+                DiagnosticsScreen(vm, onClose = { destination = Destination.SETTINGS })
+            }
         }
     }
 }

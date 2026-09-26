@@ -18,6 +18,7 @@ fun Context.messageText(message: Message): String = when (message) {
     Message.Stopped -> getString(R.string.msg_stopped)
     Message.NothingReadYet -> getString(R.string.msg_nothing_read_yet)
     Message.ReadingFailed -> getString(R.string.msg_reading_failed)
+    Message.StillWorking -> getString(R.string.msg_still_working)
     Message.TranslationOn -> getString(R.string.msg_translation_on)
     Message.TranslationOff -> getString(R.string.msg_translation_off)
     is Message.DownloadingTranslation -> getString(R.string.msg_downloading_translation, languageName(message.language))

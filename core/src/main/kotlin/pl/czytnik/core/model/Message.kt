@@ -14,6 +14,9 @@ sealed interface Message {
     data object Stopped : Message
     data object NothingReadYet : Message
     data object ReadingFailed : Message
+
+    /** Przygotowanie tekstu trwa dłużej niż zwykle (zdjęcie, OCR, tłumaczenie). */
+    data object StillWorking : Message
     data object TranslationOn : Message
     data object TranslationOff : Message
     data class DownloadingTranslation(val language: LanguageTag) : Message

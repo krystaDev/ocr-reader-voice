@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -51,7 +52,7 @@ import pl.czytnik.core.state.ErrorKind
 import pl.czytnik.core.state.Screen
 
 @Composable
-fun MainScreen(ui: MainUiState, vm: MainViewModel, onOpenDiagnostics: () -> Unit) {
+fun MainScreen(ui: MainUiState, vm: MainViewModel, onOpenSettings: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,7 +65,7 @@ fun MainScreen(ui: MainUiState, vm: MainViewModel, onOpenDiagnostics: () -> Unit
             Screen.NeedsPermission -> PermissionContent(denied = false, onClick = vm::onRetry)
             Screen.PermissionDenied -> PermissionContent(denied = true, onClick = vm::onRetry)
             is Screen.Error -> ErrorContent(screen.kind, onRetry = vm::onRetry)
-            else -> ReaderContent(ui, vm, onOpenDiagnostics)
+            else -> ReaderContent(ui, vm, onOpenSettings)
         }
     }
 }
@@ -95,7 +96,7 @@ private fun StatusLine(ui: MainUiState) {
 private fun androidx.compose.foundation.layout.ColumnScope.ReaderContent(
     ui: MainUiState,
     vm: MainViewModel,
-    onOpenDiagnostics: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val previewLabel = stringResource(R.string.preview_description)
     val tapAction = stringResource(
@@ -133,6 +134,21 @@ private fun androidx.compose.foundation.layout.ColumnScope.ReaderContent(
         )
     }
 
+    // Przyciski i tekst zajmują tyle, ile potrzebują, ale najwyżej ok. 62% ekranu – przy powiększeniu czcionki
+    // do 200% przewijają się zamiast być ucięte; podgląd dostaje resztę.
+    val maxControlsHeight = (LocalConfiguration.current.screenHeightDp * 0.62f).dp
+    Column(
+        modifier = Modifier
+            .heightIn(max = maxControlsHeight)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Controls(ui, vm, onOpenSettings)
+    }
+}
+
+@Composable
+private fun Controls(ui: MainUiState, vm: MainViewModel, onOpenSettings: () -> Unit) {
     ui.lastSpokenText?.let { text ->
         Box(
             modifier = Modifier
@@ -173,7 +189,7 @@ private fun androidx.compose.foundation.layout.ColumnScope.ReaderContent(
                 modifier = Modifier.weight(1f),
             )
         }
-        BigButton(stringResource(R.string.button_diagnostics), onOpenDiagnostics, Modifier.weight(1f))
+        BigButton(stringResource(R.string.button_settings), onOpenSettings, Modifier.weight(1f))
     }
 }
 

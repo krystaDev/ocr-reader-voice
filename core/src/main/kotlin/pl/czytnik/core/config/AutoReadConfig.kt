@@ -36,6 +36,8 @@ data class AutoReadConfig(
     val maxSpeechRate: Double = 2.0,
     val speechRateStep: Double = 0.25,
     val backgroundForgetMs: Long = 60_000,
+    val stillWorkingHintMs: Long = 3000,
+    val modelRetryMs: Long = 60_000,
 ) {
     init {
         require(analysisIntervalMs > 0) { "analysisIntervalMs must be positive" }

@@ -21,6 +21,9 @@ class MlKitTranslation : Translator, TranslationModels {
     private val modelManager = RemoteModelManager.getInstance()
     private val translators = mutableMapOf<Pair<String, String>, MlKitTranslator>()
 
+    /** Wszystkie języki obsługiwane przez ML Kit Translation. */
+    fun supportedLanguages(): List<LanguageTag> = TranslateLanguage.getAllLanguages().map(::LanguageTag)
+
     private fun mlKitCode(language: LanguageTag): String? = TranslateLanguage.fromLanguageTag(language.primary.code)
 
     override fun isSupported(language: LanguageTag): Boolean = mlKitCode(language) != null
@@ -33,6 +36,16 @@ class MlKitTranslation : Translator, TranslationModels {
     suspend fun download(language: LanguageTag) {
         val code = requireNotNull(mlKitCode(language)) { "Unsupported language: $language" }
         modelManager.download(TranslateRemoteModel.Builder(code).build(), DownloadConditions.Builder().build()).await()
+    }
+
+    /** Języki z pobranym modelem (angielski jest zawsze na urządzeniu). */
+    suspend fun downloadedLanguages(): List<LanguageTag> =
+        modelManager.getDownloadedModels(TranslateRemoteModel::class.java).await().map { LanguageTag(it.language) }
+
+    suspend fun delete(language: LanguageTag) {
+        val code = mlKitCode(language) ?: return
+        translators.keys.filter { code in it.toList() }.forEach { key -> translators.remove(key)?.close() }
+        modelManager.deleteDownloadedModel(TranslateRemoteModel.Builder(code).build()).await()
     }
 
     override suspend fun translate(text: String, from: LanguageTag, to: LanguageTag): String {

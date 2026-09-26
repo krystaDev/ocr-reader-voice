@@ -2,6 +2,8 @@ package pl.czytnik.app.speech
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -21,6 +23,16 @@ import java.util.Locale
 class AndroidSpeechOutput(context: Context, private val onReady: (Boolean) -> Unit) : VoiceCatalog {
 
     private val main = Handler(Looper.getMainLooper())
+    private val audioManager = context.getSystemService(AudioManager::class.java)
+    private val audioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_MEDIA)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+        .build()
+
+    /** Na czas czytania inne aplikacje (np. muzyka) są ściszane. */
+    private val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+        .setAudioAttributes(audioAttributes)
+        .build()
     private var ready = false
     private val pendingAnnouncements = mutableListOf<String>()
 
@@ -40,12 +52,7 @@ class AndroidSpeechOutput(context: Context, private val onReady: (Boolean) -> Un
     private fun onInit(success: Boolean) {
         ready = success && tts.engines.isNotEmpty()
         if (ready) {
-            tts.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build(),
-            )
+            tts.setAudioAttributes(audioAttributes)
             tts.setOnUtteranceProgressListener(progressListener)
             pendingAnnouncements.forEach { announce(it) }
         }
@@ -70,6 +77,7 @@ class AndroidSpeechOutput(context: Context, private val onReady: (Boolean) -> Un
             return
         }
         if (flush) tts.stop()
+        audioManager?.requestAudioFocus(focusRequest)
         currentRequestId = requestId
         this.onStart = onStart
         this.onDone = onDone
@@ -102,6 +110,7 @@ class AndroidSpeechOutput(context: Context, private val onReady: (Boolean) -> Un
     fun stop() {
         clearRequest()
         if (ready) tts.stop()
+        audioManager?.abandonAudioFocusRequest(focusRequest)
     }
 
     override fun hasVoice(language: LanguageTag): Boolean {
@@ -175,6 +184,7 @@ class AndroidSpeechOutput(context: Context, private val onReady: (Boolean) -> Un
         if (utteranceId != lastUtteranceId) return
         val done = onDone
         clearRequest()
+        audioManager?.abandonAudioFocusRequest(focusRequest)
         done?.invoke()
     }
 

@@ -17,6 +17,12 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = ciRunNumber
         versionName = "0.0.$ciRunNumber-$ciShortSha"
+
+        // Tylko procesory telefonów (bez emulatorów x86) – biblioteki ML Kit mają kod natywny dla każdego ABI,
+        // a PRD wymaga APK ≤ 60 MB.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     signingConfigs {

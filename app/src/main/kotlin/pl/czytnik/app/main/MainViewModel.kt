@@ -11,6 +11,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,7 @@ import pl.czytnik.app.translate.MlKitTranslation
 import pl.czytnik.core.config.AutoReadConfig
 import pl.czytnik.core.model.Box
 import pl.czytnik.core.model.LanguageTag
+import pl.czytnik.core.model.Message
 import pl.czytnik.core.model.OcrFrame
 import pl.czytnik.core.pipeline.ReadPipeline
 import pl.czytnik.core.state.ErrorKind
@@ -42,6 +44,9 @@ import java.util.Locale
 data class MainUiState(
     val screen: Screen = Screen.Starting,
     val translate: Boolean = true,
+    val targetLanguage: LanguageTag = LanguageTag.POLISH,
+    val autoRead: Boolean = true,
+    val autoTorch: Boolean = true,
     val speechRate: Double = 1.0,
     val torchOn: Boolean = false,
     val hasFlash: Boolean = false,
@@ -67,11 +72,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val settings = Settings(application)
     var config: AutoReadConfig = settings.config()
         private set
-    private var controller = MainController(config, settings.initialState())
+    private val translation = MlKitTranslation()
+    private var controller = MainController(config, settings.initialState(defaultTargetLanguage()))
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val languageIdentifier = MlKitLanguageIdentifier()
-    private val translation = MlKitTranslation()
     private val speech = AndroidSpeechOutput(application, ::onSpeechReady)
     private val haptics = Haptics(application)
     private val startSignal = StartSignal()
@@ -88,6 +93,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var preparation: Job? = null
     private var preparationId: Long? = null
     private val downloadingModels = mutableSetOf<String>()
+    private val modelFailedAtMs = mutableMapOf<String, Long>()
+    private var stillWorkingHint: Job? = null
     private var lastSaved: MainState? = null
 
     val analyzer = TextFrameAnalyzer(
@@ -155,6 +162,42 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun onFaster() = dispatch(MainEvent.FasterPressed)
     fun onTorchToggled() = dispatch(MainEvent.TorchToggled)
     fun onRetry() = dispatch(MainEvent.RetryPressed)
+    fun setAutoRead(enabled: Boolean) = dispatch(MainEvent.AutoReadChanged(enabled))
+    fun setAutoTorch(enabled: Boolean) = dispatch(MainEvent.AutoTorchChanged(enabled))
+    fun setTargetLanguage(language: LanguageTag) = dispatch(MainEvent.TargetLanguageChanged(language))
+
+    // --- Modele tłumaczeń (ekran Ustawienia) ---
+
+    private val _downloadedModels = MutableStateFlow<List<LanguageTag>>(emptyList())
+    val downloadedModels: StateFlow<List<LanguageTag>> = _downloadedModels.asStateFlow()
+
+    fun supportedLanguages(): List<LanguageTag> = translation.supportedLanguages()
+
+    fun refreshDownloadedModels() {
+        viewModelScope.launch {
+            _downloadedModels.value = try {
+                translation.downloadedLanguages()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Cannot list models", e)
+                emptyList()
+            }
+        }
+    }
+
+    fun deleteModel(language: LanguageTag) {
+        viewModelScope.launch {
+            try {
+                translation.delete(language)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Cannot delete model $language", e)
+            }
+            refreshDownloadedModels()
+        }
+    }
 
     /** Zmiana parametrów auto-odczytu z ekranu Diagnostyka; stan ekranu zostaje, pamięć przeczytanych – nie. */
     fun updateConfig(newConfig: AutoReadConfig) {
@@ -189,6 +232,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 is MainEffect.PrepareReading -> prepare(effect)
                 is MainEffect.CancelPreparation -> if (preparationId == effect.requestId) {
                     preparation?.cancel()
+                    stillWorkingHint?.cancel()
                     diagnostics.failed(effect.requestId, "anulowano")
                 }
                 is MainEffect.Speak -> speech.speak(
@@ -220,6 +264,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val id = effect.requestId
         preparationId = id
         diagnostics.started(id, effect.request.mode, now())
+        stillWorkingHint?.cancel()
+        stillWorkingHint = viewModelScope.launch {
+            delay(config.stillWorkingHintMs)
+            if (preparationId == id && preparation?.isActive == true) announce(getApplication<Application>().messageText(Message.StillWorking))
+        }
         preparation = viewModelScope.launch {
             try {
                 val reading = pipeline.prepare(
@@ -227,6 +276,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     capturePhoto = { camera.takePhotoFrame(recognizer).also { diagnostics.photoDone(id, now()) } },
                     selectFromPhoto = { photo, forced -> controller.selectFromPhoto(photo, forced) },
                 )
+                stillWorkingHint?.cancel()
                 diagnostics.prepared(id, reading, now())
                 dispatch(if (reading != null) MainEvent.ReadingPrepared(id, reading) else MainEvent.NothingRecognized(id))
             } catch (e: CancellationException) {
@@ -240,21 +290,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun ensureModel(language: LanguageTag) {
-        if (!translation.isSupported(language) || !downloadingModels.add(language.primary.code)) return
+        val code = language.primary.code
+        val lastFailure = modelFailedAtMs[code]
+        if (lastFailure != null && now() - lastFailure < config.modelRetryMs) return
+        if (!translation.isSupported(language) || !downloadingModels.add(code)) return
         viewModelScope.launch {
             try {
                 if (!translation.isDownloaded(language)) {
                     dispatch(MainEvent.TranslationModelDownloadStarted(language))
                     translation.download(language)
                     dispatch(MainEvent.TranslationModelReady(language))
+                    refreshDownloadedModels()
                 }
+                modelFailedAtMs.remove(code)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "Model download failed: $language", e)
+                modelFailedAtMs[code] = now()
                 dispatch(MainEvent.TranslationModelFailed(language))
             } finally {
-                downloadingModels.remove(language.primary.code)
+                downloadingModels.remove(code)
             }
         }
     }
@@ -271,6 +327,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             it.copy(
                 screen = state.screen,
                 translate = state.translate,
+                targetLanguage = state.targetLanguage,
+                autoRead = state.autoRead,
+                autoTorch = state.autoTorch,
                 speechRate = state.speechRate,
                 torchOn = state.torchOn,
                 lastSpokenText = state.lastSpokenText,
@@ -282,6 +341,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun saveIfChanged(state: MainState) {
         val previous = lastSaved
         if (previous != null && previous.translate == state.translate && previous.speechRate == state.speechRate &&
+            previous.targetLanguage == state.targetLanguage &&
             previous.autoRead == state.autoRead && previous.autoTorch == state.autoTorch &&
             previous.firstLaunch == state.firstLaunch
         ) {
@@ -301,6 +361,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     private fun now() = SystemClock.elapsedRealtime()
+
+    /** F10: domyślnie język telefonu, jeśli ML Kit umie na niego tłumaczyć; inaczej angielski. */
+    private fun defaultTargetLanguage(): LanguageTag {
+        val device = LanguageTag(Locale.getDefault().language)
+        return if (translation.isSupported(device)) device.primary else LanguageTag.ENGLISH
+    }
 
     override fun onCleared() {
         preparation?.cancel()
