@@ -506,9 +506,11 @@ Katalog `testdata/images/` (w repo, z plikiem `testdata/README.md` opisującym k
 | Ekran tabletu – komiks | ≥ 20 | zdjęcia **telefonem** ekranu tabletu z aplikacją Marvela: pojedynczy dymek, dymek + ucięty sąsiad, ramka narracyjna, wyrazy dźwiękonaśladowcze; z odblaskiem, z morą, z latarką i bez, różne odległości |
 | Sekwencje | ≥ 3 | krótkie nagrania wideo przesuwania telefonu po stronie komiksu → wyeksportowane `OcrFrame` (JSON) do symulacji w `core` |
 
-Prawa autorskie: zdjęcia stron komiksów Marvela nie mogą trafić do publicznego repozytorium. Jeśli repozytorium jest
-publiczne – zestaw komiksowy trzymamy poza nim (prywatny katalog/dysk), a w repo tylko wyekstrahowane `OcrFrame` JSON
-z krótkimi fragmentami tekstu lub zdjęcia własnych, podobnych dymków. Do decyzji (rozdz. 9).
+**Decyzja (2026-09-26): zdjęć i nagrań komiksów Marvela nie trzymamy w repozytorium** (niezależnie od jego
+widoczności). Zestaw komiksowy leży w prywatnym katalogu poza repo; testy instrumentowane czytają go z urządzenia
+(np. `/sdcard/Download/czytnik-testdata/`) i są pomijane, gdy katalogu nie ma. W repo: zdjęcia druku, zdjęcia
+własnoręcznie przygotowanych dymków (nasz tekst w komiksowym stylu, wyświetlony na tablecie) oraz sekwencje
+`OcrFrame` JSON zbudowane z takich własnych materiałów.
 
 Miara OCR z PRD (≥ 95% znaków) liczona jako 1 − CER (odległość Levenshteina / długość wzorca) – narzędzie w `core`,
 uruchamiane testem instrumentowanym na zestawie.
@@ -579,9 +581,20 @@ Rozmiar: bundled OCR łaciński + Language ID to kilka MB na ABI; uniwersalne de
   zainstalowane.
 - **Podpis**: `app/debug.keystore` w repozytorium (klucz debug, nie jest tajny) i jawnie wskazany w `signingConfigs.debug`.
   Bez tego każdy runner generuje inny klucz i kolejne APK nie instalują się na poprzednie.
-- **Dostarczenie Damianowi**: artefakt Actions wymaga konta GitHub i rozpakowania ZIP – niewygodne. Propozycja: na tag
-  `v0.*` drugie zadanie tworzy GitHub **pre-release** z plikiem APK (stały link do pobrania na telefonie). Wymaga
-  decyzji o widoczności repozytorium (rozdz. 9).
+- **Dostarczenie Damianowi (decyzja 2026-09-26)**: APK pobrane z artefaktu CI przekazujemy **linkiem** (np. Dysk
+  Google) lub mailem – bez sklepu. Instalacja spoza Google Play („sideloading”) jest w Androidzie dozwolona:
+  - przy pierwszej instalacji system prosi o zgodę „Instaluj nieznane aplikacje” dla aplikacji, z której otwierany jest
+    plik (Chrome, Gmail, Pliki, Dysk) – jednorazowo;
+  - Google Play Protect może pokazać ostrzeżenie o nieznanej aplikacji i zaproponować skanowanie; nie blokuje
+    aplikacji, która nie jest szkodliwa (nasza nie ma podejrzanych uprawnień – tylko aparat, wibracje, internet);
+  - aktualizacja = zainstalowanie nowego APK na stare; działa dzięki wspólnemu kluczowi debug (wyżej). Brak
+    automatycznych aktualizacji – każdą wersję trzeba wysłać;
+  - pierwszą instalację warto zrobić razem z Damianem (kilka systemowych okien z drobnym tekstem);
+  - **ryzyko na przyszłość**: Google wprowadza obowiązkową weryfikację deweloperów także dla aplikacji spoza sklepu
+    (od września 2026 w kilku krajach, globalnie zapowiadane na 2027; wyjątki dla instalacji przez ADB i
+    przewidziane konto do dystrybucji na małą liczbę urządzeń). W Polsce dziś nie blokuje; przed rozszerzeniem
+    zasięgu trzeba sprawdzić aktualne zasady i ewentualnie zarejestrować się jako deweloper.
+  - Pre-release na GitHubie – opcjonalnie później, jeśli repozytorium będzie publiczne.
 - Na później: Dependabot dla Gradle i Actions.
 
 ---
@@ -635,10 +648,11 @@ pracuje więcej niż jedna osoba.
 
 ### 9.3 Decyzje do podjęcia przed etapem 0
 
-1. **`applicationId` i nazwa pakietu** – propozycja robocza `pl.czytnik.glosowy` (wymaga domeny/nazwy, której nie
-   zmienimy po publikacji w Google Play).
-2. **Widoczność repozytorium** – wpływa na: zdjęcia komiksów w repo (prawa autorskie), pobieranie APK przez Damiana
-   z pre-release bez konta GitHub.
+1. ~~`applicationId`~~ – **przyjęte robocze `pl.czytnik.glosowy`** (2026-09-26). Zmiana przed publikacją w sklepie
+   jest możliwa; skutek: system traktuje to jako nową aplikację, trzeba odinstalować starą (utrata pobranego modelu
+   i ustawień).
+2. ~~Zdjęcia komiksów i dystrybucja~~ – **zdjęcia komiksów poza repo, APK dla Damiana przez link/mail** (2026-09-26,
+   rozdz. 6.3 i 7.3).
 3. **Akceptacja kolejności etapów** – w szczególności APK dla Damiana **bez tłumaczenia** w etapie 2 (szybka informacja
    o trafianiu w dymki), tłumaczenie dopiero w etapie 3.
 4. **Domyślny stan przełącznika „Tłumacz”** – propozycja: wyłączony przy pierwszym uruchomieniu, potem zapamiętany
