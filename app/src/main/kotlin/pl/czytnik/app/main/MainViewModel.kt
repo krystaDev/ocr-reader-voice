@@ -136,6 +136,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun onCameraBound(success: Boolean) {
         cameraReady = success
         _ui.update { it.copy(hasFlash = camera.hasFlash) }
+        // Po ponownym związaniu aparatu (np. powrót z Ustawień) latarka jest zgaszona – przywracamy jej stan.
+        if (success && controller.state.torchOn) camera.setTorch(true)
         if (success) maybeCompleteStartup() else dispatch(MainEvent.StartupFailed(ErrorKind.CAMERA_UNAVAILABLE))
     }
 

@@ -30,6 +30,8 @@ class MlKitTranslation : Translator, TranslationModels {
 
     override suspend fun isDownloaded(language: LanguageTag): Boolean {
         val code = mlKitCode(language) ?: return false
+        // Model angielski jest wbudowany w bibliotekę – nie polegamy na tym, czy menedżer modeli go zgłasza.
+        if (code == TranslateLanguage.ENGLISH) return true
         return modelManager.isModelDownloaded(TranslateRemoteModel.Builder(code).build()).await()
     }
 

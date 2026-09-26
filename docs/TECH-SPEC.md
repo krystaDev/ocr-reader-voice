@@ -615,16 +615,48 @@ Kolejność ustawiona tak, żeby Damian dostał działające APK z polskim przek
 
 | Etap | Zakres | Kryteria ukończenia |
 | --- | --- | --- |
-| **0. Szkielet i CI** | Projekt Gradle (`core` + `app`), katalog wersji, pusta aktywność Compose z motywem, workflow CI, debug keystore | Zielony CI na gałęzi; artefakt APK instaluje się i uruchamia na telefonie; `./gradlew -p core test` przechodzi w chmurze |
+| **0. Szkielet i CI** ✅ | Projekt Gradle (`core` + `app`), katalog wersji, pusta aktywność Compose z motywem, workflow CI, debug keystore | Zielony CI na gałęzi; artefakt APK instaluje się i uruchamia na telefonie; `./gradlew -p core test` przechodzi w chmurze |
 | **1. Logika rdzenia (JVM)** ✅ | `model`, `text`, `autoread`, `language`, `state`, `pipeline` na portach + testy z rozdz. 6.1 (bez sekwencji z nagrań) | Wszystkie testy `core` zielone; reduktor pokrywa tabelę 2.3; symulacja „4 dymki” na syntetycznych klatkach – każdy przeczytany raz |
-| **2. APK #1 dla Damiana: czyta po angielsku i po polsku** | CameraX (podgląd + analiza + zdjęcie), OCR łaciński, TTS z doborem głosu, auto-odczyt, dotknięcie = stop/czytaj teraz, Powtórz, wibracje, sygnał, podstawowe komunikaty, uprawnienie. **Proste tłumaczenie**: przełącznik Tłumacz (+ ponowny odczyt tego samego tekstu), stała para EN→PL, jednorazowe pobranie modelu PL z komunikatem głosowym. Ekran Diagnostyka: parametry, czasy, **tekst przed i po tłumaczeniu** (żeby odróżnić błąd OCR od błędu przekładu) | Scenariusz Damiana w całości na urządzeniu dewelopera; model PL po pobraniu działa w trybie samolotowym; APK wysłane Damianowi; **zebrane zdjęcia i sekwencje z jego tabletu** (poza repo) |
-| **3. Tłumaczenie – dopracowanie** | Language ID z fallbackiem dla krótkich dymków (zamiast stałej pary EN→PL), normalizacja WIELKICH LITER (przełączalna), brak sieci / ponawianie pobierania, język docelowy w ustawieniach, modele źródłowe innych języków | Czas ≤ 7 s (p75) na telefonie Damiana; porównanie z/bez normalizacji WIELKICH LITER na jego materiałach; APK #2 dla Damiana |
-| **4. Strojenie na danych Damiana** | Sekwencje z etapu 2 jako testy w `core`; korekta parametrów; decyzja D7 (zdjęcie vs klatka analizy) i D6 (WIELKIE LITERY) na podstawie pomiarów; ekspozycja/mora | 0 niechcianych powtórzeń i 0 fałszywych startów na nagranych sekwencjach; decyzje zapisane w tym dokumencie |
-| **5. Dostępność i „Should”** | Pełny UI z rozdz. 5 (status liveRegion, panel tekstu F14, tempo F12, latarka F13 z auto, tryb ręczny F15), TalkBack (`Announcer`), wskazówki „Nie widzę tekstu / Odsuń / Trzymaj nieruchomo”, ustawienia, lokalizacja EN | Przegląd TalkBack + Accessibility Scanner bez błędów; `fontScale 2.0` bez obcięć; kontrast zweryfikowany; test „bez patrzenia na ekran” przez osobę widzącą z zasłoniętymi oczami |
-| **6. Wersja testowa** | Poprawki z testów, zestaw 30 zdjęć druku + pomiar CER, testy na 3 telefonach, pre-release | Miary PRD sprawdzone na zestawie i urządzeniach; APK gotowe do testów z użytkownikami (PZN) |
+| **2. APK #1 dla Damiana: czyta po angielsku i po polsku** ✅ (kod; test na telefonie – przed nami) | CameraX (podgląd + analiza + zdjęcie), OCR łaciński, TTS z doborem głosu, auto-odczyt, dotknięcie = stop/czytaj teraz, Powtórz, wibracje, sygnał, podstawowe komunikaty, uprawnienie. **Proste tłumaczenie**: przełącznik Tłumacz (+ ponowny odczyt tego samego tekstu), stała para EN→PL, jednorazowe pobranie modelu PL z komunikatem głosowym. Ekran Diagnostyka: parametry, czasy, **tekst przed i po tłumaczeniu** (żeby odróżnić błąd OCR od błędu przekładu) | Scenariusz Damiana w całości na urządzeniu dewelopera; model PL po pobraniu działa w trybie samolotowym; APK wysłane Damianowi; **zebrane zdjęcia i sekwencje z jego tabletu** (poza repo) |
+| **3. Tłumaczenie – dopracowanie** ✅ (kod) | Language ID z fallbackiem dla krótkich dymków (zamiast stałej pary EN→PL), normalizacja WIELKICH LITER (przełączalna), brak sieci / ponawianie pobierania, język docelowy w ustawieniach, modele źródłowe innych języków | Czas ≤ 7 s (p75) na telefonie Damiana; porównanie z/bez normalizacji WIELKICH LITER na jego materiałach; APK #2 dla Damiana |
+| **4. Strojenie na danych Damiana** 🔧 narzędzia gotowe, czeka na nagrania | Sekwencje z etapu 2 jako testy w `core`; korekta parametrów; decyzja D7 (zdjęcie vs klatka analizy) i D6 (WIELKIE LITERY) na podstawie pomiarów; ekspozycja/mora | 0 niechcianych powtórzeń i 0 fałszywych startów na nagranych sekwencjach; decyzje zapisane w tym dokumencie |
+| **5. Dostępność i „Should”** ✅ (kod; przegląd z TalkBack – na telefonie) | Pełny UI z rozdz. 5 (status liveRegion, panel tekstu F14, tempo F12, latarka F13 z auto, tryb ręczny F15), TalkBack (`Announcer`), wskazówki „Nie widzę tekstu / Odsuń / Trzymaj nieruchomo”, ustawienia, lokalizacja EN | Przegląd TalkBack + Accessibility Scanner bez błędów; `fontScale 2.0` bez obcięć; kontrast zweryfikowany; test „bez patrzenia na ekran” przez osobę widzącą z zasłoniętymi oczami |
+| **6. Wersja testowa** 🔧 miara CER i protokoły gotowe, pomiary na telefonach – przed nami | Poprawki z testów, zestaw 30 zdjęć druku + pomiar CER, testy na 3 telefonach, pre-release | Miary PRD sprawdzone na zestawie i urządzeniach; APK gotowe do testów z użytkownikami (PZN) |
 
 Etapy 0–1 nie wymagają urządzenia; od etapu 2 każdy etap kończy się APK z CI. Etapy 3 i 5 mogą iść równolegle, jeśli
 pracuje więcej niż jedna osoba.
+
+### 8.1 Stan implementacji (2026-09-26)
+
+Cały kod MVP jest napisany i buduje się w CI; **na telefonie nic jeszcze nie było uruchomione**. Logika z `core`
+ma 117 testów na JVM (w tym symulację strony komiksu i odtwarzanie nagranych sekwencji).
+
+Zrobione ponad plan etapów:
+
+- Nagrywanie klatek w aplikacji (Diagnostyka → Nagrywanie klatek → Udostępnij; sam tekst i ramki) + `ReplayTest`,
+  który odtwarza każde nagranie z `core/src/test/resources/sequences` – strojenie parametrów na danych Damiana
+  bez jego obecności.
+- Miara CER (`TextMetrics`) dla celu PRD „≥ 95% znaków”.
+- Instrukcja instalacji spoza sklepu (`docs/INSTALACJA.md`), szablon protokołu testu (`docs/tests/`).
+
+Odstępstwa od speca:
+
+| Spec | Implementacja | Dlaczego |
+| --- | --- | --- |
+| „Tłumaczę…” po 1,5 s | „Chwileczkę…” po 3 s (`stillWorkingHintMs`) | Opóźnienie to także zdjęcie i OCR, nie tylko tłumaczenie; krótszy próg gadałby przy każdym dymku |
+| Ekran Diagnostyka po PL i EN | tylko PL | Narzędzie deweloperskie do testów z Damianem |
+| ZSL przy zdjęciu | `CAPTURE_MODE_MINIMIZE_LATENCY` | Prostsze; ZSL do rozważenia po pomiarach czasu |
+| Kompensacja ekspozycji jako parametr | brak | Dodamy, jeśli zdjęcia z tabletu pokażą prześwietlenie |
+| Wybór dymka dotknięciem | brak | Decyzja 2026-09-26 (rozdz. 9.4) |
+| Model docelowy pobierany przy włączeniu „Tłumacz” | przy każdym starcie sprawdzany, pobierany, gdy go brak | Przełącznik jest domyślnie włączony |
+
+Nie zrobione (świadomie, do decyzji po teście):
+
+- Testy UI Compose i testy instrumentowane na urządzeniu (CI ich nie uruchamia – brak emulatora); zestaw zdjęć
+  i pomiar CER wykonujemy ręcznie wg `testdata/README.md`.
+- F16 (udostępnianie zdjęć z galerii) i F17 (pisma CJK/dewanagari) – „Could”.
+- Strumieniowe tłumaczenie (czytanie pierwszego dymka w trakcie tłumaczenia kolejnych), żyroskop jako warunek
+  stabilności, ustawienie „czytaj też oryginał”, automatyczny pre-release na tagi, Dependabot.
 
 ---
 
