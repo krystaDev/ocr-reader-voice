@@ -26,7 +26,7 @@ Cel: **zero kliknięć** – telefon sam czyta nowy dymek po angielsku albo po p
 | D9 | Automatyczna latarka: domyślnie włączona, ale ręczne wyłączenie blokuje auto-włączanie do końca sesji + osobne ustawienie | Odblask na szkle tabletu |
 | D10 | Komunikaty stanu: przy włączonym TalkBack przez `liveRegion` (mówi TalkBack), bez TalkBack – nasz TTS. Treść czytanego tekstu zawsze naszym TTS | Brak podwójnej mowy |
 | D11 | CI: GitHub Actions buduje debug APK jako artefakt; **wspólny debug keystore w repozytorium** | Kolejne APK instalują się „na” poprzednie bez odinstalowania (inaczej Damian traci pobrany model i ustawienia) |
-| D12 | Pierwsze APK dla Damiana już w etapie 2 (auto-odczyt EN bez tłumaczenia), tłumaczenie w etapie 3 | Najszybsza możliwa informacja zwrotna o najbardziej ryzykownym elemencie – trafianiu w dymek i powtórzeniach |
+| D12 | Pierwsze APK dla Damiana już w etapie 2: auto-odczyt + **proste tłumaczenie EN→PL**; dopracowanie tłumaczenia w etapie 3 | Szybka informacja zwrotna o trafianiu w dymki i powtórzeniach, a Damian od razu dostaje to, czego potrzebuje – polski przekład (decyzja 2026-09-26) |
 
 ---
 
@@ -601,15 +601,15 @@ Rozmiar: bundled OCR łaciński + Language ID to kilka MB na ABI; uniwersalne de
 
 ## 8. Plan implementacji
 
-Kolejność ustawiona tak, żeby Damian dostał działające APK jak najszybciej (etap 2), a ryzyko „czy auto-odczyt
-trafia w dymki bez powtórzeń” sprawdzić, zanim zainwestujemy w resztę.
+Kolejność ustawiona tak, żeby Damian dostał działające APK z polskim przekładem jak najszybciej (etap 2), a ryzyko
+„czy auto-odczyt trafia w dymki bez powtórzeń” sprawdzić, zanim zainwestujemy w resztę.
 
 | Etap | Zakres | Kryteria ukończenia |
 | --- | --- | --- |
 | **0. Szkielet i CI** | Projekt Gradle (`core` + `app`), katalog wersji, pusta aktywność Compose z motywem, workflow CI, debug keystore | Zielony CI na gałęzi; artefakt APK instaluje się i uruchamia na telefonie; `./gradlew -p core test` przechodzi w chmurze |
 | **1. Logika rdzenia (JVM)** | `model`, `text`, `autoread`, `language`, `state`, `pipeline` na portach + testy z rozdz. 6.1 (bez sekwencji z nagrań) | Wszystkie testy `core` zielone; reduktor pokrywa tabelę 2.3; symulacja „4 dymki” na syntetycznych klatkach – każdy przeczytany raz |
-| **2. APK #1 dla Damiana: czyta po angielsku** | CameraX (podgląd + analiza + zdjęcie), OCR łaciński, TTS z doborem głosu, auto-odczyt, dotknięcie = stop/czytaj teraz, Powtórz, wibracje, sygnał, podstawowe komunikaty, uprawnienie, ekran Diagnostyka (parametry + czasy) | Scenariusz Damiana kroki 1, 2, 4 (bez tłumaczenia), 5–7 na urządzeniu dewelopera; APK wysłane Damianowi; **zebrane zdjęcia i sekwencje z jego tabletu** |
-| **3. Tłumaczenie** | Language ID z fallbackiem, przełącznik Tłumacz (+ ponowny odczyt), pobieranie modelu PL z komunikatami, tryb offline, język docelowy w ustawieniach, normalizacja WIELKICH LITER (przełączalna) | Scenariusz Damiana w całości; model pobrany raz działa w trybie samolotowym; czas ≤ 7 s (p75) na telefonie Damiana; APK #2 dla Damiana |
+| **2. APK #1 dla Damiana: czyta po angielsku i po polsku** | CameraX (podgląd + analiza + zdjęcie), OCR łaciński, TTS z doborem głosu, auto-odczyt, dotknięcie = stop/czytaj teraz, Powtórz, wibracje, sygnał, podstawowe komunikaty, uprawnienie. **Proste tłumaczenie**: przełącznik Tłumacz (+ ponowny odczyt tego samego tekstu), stała para EN→PL, jednorazowe pobranie modelu PL z komunikatem głosowym. Ekran Diagnostyka: parametry, czasy, **tekst przed i po tłumaczeniu** (żeby odróżnić błąd OCR od błędu przekładu) | Scenariusz Damiana w całości na urządzeniu dewelopera; model PL po pobraniu działa w trybie samolotowym; APK wysłane Damianowi; **zebrane zdjęcia i sekwencje z jego tabletu** (poza repo) |
+| **3. Tłumaczenie – dopracowanie** | Language ID z fallbackiem dla krótkich dymków (zamiast stałej pary EN→PL), normalizacja WIELKICH LITER (przełączalna), brak sieci / ponawianie pobierania, język docelowy w ustawieniach, modele źródłowe innych języków | Czas ≤ 7 s (p75) na telefonie Damiana; porównanie z/bez normalizacji WIELKICH LITER na jego materiałach; APK #2 dla Damiana |
 | **4. Strojenie na danych Damiana** | Sekwencje z etapu 2 jako testy w `core`; korekta parametrów; decyzja D7 (zdjęcie vs klatka analizy) i D6 (WIELKIE LITERY) na podstawie pomiarów; ekspozycja/mora | 0 niechcianych powtórzeń i 0 fałszywych startów na nagranych sekwencjach; decyzje zapisane w tym dokumencie |
 | **5. Dostępność i „Should”** | Pełny UI z rozdz. 5 (status liveRegion, panel tekstu F14, tempo F12, latarka F13 z auto, tryb ręczny F15), TalkBack (`Announcer`), wskazówki „Nie widzę tekstu / Odsuń / Trzymaj nieruchomo”, ustawienia, lokalizacja EN | Przegląd TalkBack + Accessibility Scanner bez błędów; `fontScale 2.0` bez obcięć; kontrast zweryfikowany; test „bez patrzenia na ekran” przez osobę widzącą z zasłoniętymi oczami |
 | **6. Wersja testowa** | Poprawki z testów, zestaw 30 zdjęć druku + pomiar CER, testy na 3 telefonach, pre-release | Miary PRD sprawdzone na zestawie i urządzeniach; APK gotowe do testów z użytkownikami (PZN) |
@@ -653,9 +653,38 @@ pracuje więcej niż jedna osoba.
    i ustawień).
 2. ~~Zdjęcia komiksów i dystrybucja~~ – **zdjęcia komiksów poza repo, APK dla Damiana przez link/mail** (2026-09-26,
    rozdz. 6.3 i 7.3).
-3. **Akceptacja kolejności etapów** – w szczególności APK dla Damiana **bez tłumaczenia** w etapie 2 (szybka informacja
-   o trafianiu w dymki), tłumaczenie dopiero w etapie 3.
+3. ~~Kolejność etapów~~ – **APK #1 z prostym tłumaczeniem EN→PL** (2026-09-26, rozdz. 8).
+6. **Wybór dymka dotknięciem (pomysł Damiana z Lookout)** – zob. 9.4.
 4. **Domyślny stan przełącznika „Tłumacz”** – propozycja: wyłączony przy pierwszym uruchomieniu, potem zapamiętany
    (Damian włącza raz).
 5. **Wynik testu Damiana z Tłumaczem Google offline** (PRD, kolejne kroki, pkt 2) – jeśli negatywny, zanim zaczniemy
    etap 3 trzeba zdecydować o Cloud Translation (klucz API, koszty, prywatność, zmiana PRD).
+
+### 9.4 Propozycja: wybór dymka dotknięciem (inspiracja: Lookout)
+
+Damian zwrócił uwagę na aplikację Google Lookout, w której można wskazać na ekranie, co dokładnie ma zostać
+przetłumaczone. Do potwierdzenia z Damianem, o którą funkcję dokładnie chodzi i w jakiej sytuacji jej potrzebuje
+(np. gdy w kadrze są dwa dymki, a chce usłyszeć jeden).
+
+Nasza architektura to wspiera, bo znamy ramki bloków w kadrze:
+
+- **Wariant A – dotknij dymka na podglądzie** (tani, ok. 0,5–1 dnia): w `Scanning`/`Speaking` dotknięcie wewnątrz
+  (powiększonej o margines) ramki wykrytego bloku czyta **tylko ten blok**; dotknięcie poza ramkami działa jak dotąd
+  (czytaj wszystko / stop). Ramki są stale obrysowane żółtym, grubym konturem (rozdz. 5.1). Nowe zdarzenie
+  `BlockTapped(blockId)` w reduktorze.
+- **Wariant B – zamrożenie kadru** (ok. 2–3 dni): przycisk / automatycznie po odczycie – podgląd zastępuje zdjęcie
+  z zaznaczonymi dymkami; można odłożyć telefon i wybierać dymki palcem, z powiększaniem. Bliżej Google Lens/Lookout.
+
+Zastrzeżenia:
+
+- Sprzeczne z celem „zero kliknięć” tylko wtedy, gdy staje się obowiązkowe – proponujemy je jako **dodatek**, auto-odczyt
+  zostaje domyślny.
+- Damian ma bardzo wąskie pole widzenia – trafienie palcem w mały dymek na ekranie telefonu może być trudne; stąd duże
+  obrysy i powiększony obszar dotyku.
+- TalkBack: ramki zmieniają się co ~350 ms, więc nie wystawiamy ich jako osobnych elementów dostępności (fokus by
+  skakał). Użytkownicy TalkBack zostają przy „cały podgląd = jeden przycisk”; wariant B mógłby wystawić dymki
+  zamrożonego kadru jako listę elementów.
+
+**Rekomendacja:** wariant A od razu w APK #1 (koszt mały, a sprawdzimy, czy Damian z tego korzysta); wariant B dopiero,
+jeśli test pokaże potrzebę. Warto też, żeby Damian porównał sam Lookout na swoim tablecie – jeśli spełnia jego potrzeby,
+to ważna informacja dla całego projektu.
