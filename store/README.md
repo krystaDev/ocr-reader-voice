@@ -53,8 +53,8 @@ Play odrzuca zrzuty, których dłuższy bok jest więcej niż 2 razy dłuższy o
 > • Ten sam tekst nie jest czytany w kółko.
 > • Latarka – ręcznie albo sama, gdy jest ciemno.
 >
-> Prywatność: tekst jest rozpoznawany na telefonie. Aplikacja nie wysyła zdjęć ani tekstu na serwery, nie ma kont,
-> reklam ani śledzenia. Internet jest potrzebny tylko do jednorazowego pobrania modelu tłumaczenia (ok. 30 MB).
+> Prywatność: tekst jest rozpoznawany na telefonie. Aplikacja nie wysyła zdjęć ani tekstu na serwery, nie ma kont
+> ani reklam. Internet jest potrzebny do jednorazowego pobrania modelu tłumaczenia (ok. 30 MB).
 
 **Kategoria:** Narzędzia (lub Edukacja). **Kontakt:** e-mail (wymagany przez Play Console), strona: adres strony
 projektu.
@@ -62,8 +62,15 @@ projektu.
 ## Formularze w Play Console (podpowiedzi)
 
 - **Polityka prywatności** – adres `…/privacy.html` powyżej.
-- **Bezpieczeństwo danych** – aplikacja nie zbiera danych na serwer twórcy. ML Kit wysyła do Google dane
-  diagnostyczne o działaniu biblioteki; przed wypełnieniem sprawdź aktualne wskazówki Google:
-  https://developers.google.com/ml-kit/android-data-disclosure
+- **Bezpieczeństwo danych** – twórca nie zbiera danych, ale biblioteka ML Kit wysyła do Google dane diagnostyczne
+  (https://developers.google.com/ml-kit/android-data-disclosure, stan na 2026-07-15), więc deklarujemy je jako
+  zbierane przez aplikację:
+  - *Informacje o aplikacji i wydajności → Dane diagnostyczne* (model urządzenia, wersja systemu, opóźnienia, kody
+    błędów) – cel: Analityka; zbieranie obowiązkowe (nie da się wyłączyć).
+  - *Identyfikatory urządzenia lub inne* (identyfikatory instalacji, Firebase Installations) – cel: Analityka;
+    obowiązkowe.
+  - Udostępnianie podmiotom trzecim: **nie**. Szyfrowanie podczas przesyłania: **tak**. Możliwość prośby o usunięcie:
+    **nie** (twórca nie ma tych danych).
+  - Zdjęcia, tekst, lokalizacja, dane osobowe: **nie są zbierane**.
 - **Reklamy** – nie. **Konta użytkowników** – brak (adres do usuwania konta nie jest potrzebny).
 - **Ułatwienia dostępu** – aplikacja nie korzysta z API AccessibilityService, więc nie trzeba składać deklaracji.
