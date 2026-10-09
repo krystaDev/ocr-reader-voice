@@ -13,6 +13,8 @@ Aplikacja Android, która czyta na głos tekst widoczny w aparacie – opcjonaln
 | --- | --- | --- |
 | Testy logiki (moduł `core`, czysty Kotlin/JVM) | `./gradlew -p core test` | nie |
 | Debug APK | `./gradlew :app:assembleDebug` | tak |
+| Release z R8 podpisany kluczem debug (test na telefonie) | `./gradlew :app:assembleR8test` | tak |
+| Release AAB do Google Play (wymaga własnego klucza podpisu) | `./gradlew :app:bundleRelease -PversionCode=<n>` | tak |
 
 Każdy push buduje w GitHub Actions debug APK (zakładka **Actions** → przebieg → artefakt
 `czytnik-glosowy-debug-<commit>`). APK są podpisane wspólnym kluczem debug z `app/debug.keystore`, więc nowa wersja

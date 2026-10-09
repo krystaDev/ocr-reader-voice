@@ -32,11 +32,24 @@ jobs:
       - name: App unit tests, lint and debug APK
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 
+      - name: Release APK with R8 (signed with the debug key, for phone testing)
+        run: ./gradlew :app:assembleR8test
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: czytnik-glosowy-debug-${{ env.SHORT_SHA }}
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload R8 test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: czytnik-glosowy-r8test-${{ env.SHORT_SHA }}
+          path: |
+            app/build/outputs/apk/r8test/*.apk
+            app/build/outputs/mapping/r8test/mapping.txt
           retention-days: 30
           if-no-files-found: error
 

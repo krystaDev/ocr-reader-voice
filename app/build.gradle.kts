@@ -3,8 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// Numer wersji z CI: versionCode = numer przebiegu GitHub Actions, versionName zawiera skrót commita.
-val ciRunNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+// Wersja dla użytkownika: zmieniana ręcznie przy wydaniu w Google Play.
+val appVersionName = "1.0.0"
+// versionCode musi rosnąć z każdym plikiem wysłanym do Google Play: w CI to numer przebiegu GitHub Actions, przy
+// budowaniu lokalnym podaj go ręcznie, np. ./gradlew :app:bundleRelease -PversionCode=26.
+val appVersionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+    ?: (findProperty("versionCode") as String?)?.toIntOrNull()
+    ?: 1
 val ciShortSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
 
 android {
@@ -15,8 +20,8 @@ android {
         applicationId = "pl.czytnik.glosowy"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = ciRunNumber
-        versionName = "0.0.$ciRunNumber-$ciShortSha"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         // Tylko procesory telefonów (bez emulatorów x86) – biblioteki ML Kit mają kod natywny dla każdego ABI,
         // a PRD wymaga APK ≤ 60 MB.
@@ -39,6 +44,22 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
+            // Wersje testowe z CI rozpoznawalne w Ustawienia → O aplikacji: 1.0.0-25-abc1234.
+            versionNameSuffix = "-$appVersionCode-$ciShortSha"
+        }
+        release {
+            // R8: usuwa nieużywany kod i zasoby, zmniejsza APK/AAB.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        // Release z R8, ale podpisany wspólnym kluczem debug: instaluje się na wersję testową, żeby sprawdzić na
+        // telefonie, czy R8 niczego nie zepsuł (Google Play nie przyjmie tego pliku).
+        create("r8test") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-r8-$appVersionCode-$ciShortSha"
+            matchingFallbacks += "release"
         }
     }
 
