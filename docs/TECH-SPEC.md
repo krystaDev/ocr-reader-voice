@@ -18,7 +18,7 @@ Cel: **zero kliknięć** – telefon sam czyta nowy dymek po angielsku albo po p
 | D1 | Dwa moduły: czysty Kotlin/JVM `core` (cała logika) + Androidowy `app` (adaptery, UI) | Logikę da się testować bez Androida, także w środowisku chmurowym bez Android SDK |
 | D2 | `core` jako **osobny build Gradle** włączany przez `includeBuild` | Build `core` nie wymaga Google Maven (dl.google.com), więc `./gradlew -p core test` działa w chmurze |
 | D3 | Ekran główny sterowany maszyną stanów typu reduktor: `(Stan, Zdarzenie) → (Stan, Efekty)` | Deterministyczna, w 100% testowalna na JVM; ViewModel tylko wykonuje efekty |
-| D4 | Auto-odczyt: stabilność liczona na tekście z klatek analizy (≈ co 350 ms), **deduplikacja na poziomie bloków** (dymków) | Przy przesuwaniu telefonu po stronie komiksu czytamy tylko nowy dymek, a nie ponownie sąsiedni |
+| D4 | Auto-odczyt: stabilność liczona na tekście z klatek analizy (≈ co 250 ms), **deduplikacja na poziomie bloków** (dymków) | Przy przesuwaniu telefonu po stronie komiksu czytamy tylko nowy dymek, a nie ponownie sąsiedni |
 | D5 | Bloki ucięte krawędzią kadru są pomijane (gdy w kadrze jest też pełny blok) | Kawałek sąsiedniego dymka nie jest czytany; gdy wszystko jest ucięte → „Odsuń telefon” |
 | D6 | Tekst pisany WIELKIMI LITERAMI (komiksy) normalizujemy do zdań przed tłumaczeniem i TTS | Lepsza jakość tłumaczenia i wymowy; do weryfikacji na zestawie Damiana (przełącznik w kodzie) |
 | D7 | Zdjęcie wysokiej rozdzielczości przed odczytem – **włączone domyślnie, ale jako parametr** | PRD tego wymaga (F3); dla dużych liter na ekranie tabletu klatka analizy może wystarczyć i być szybsza – rozstrzygamy pomiarem |
@@ -76,7 +76,7 @@ i wykonuje efekty. Pakiet `pl.czytnik` jest roboczy – do potwierdzenia razem z
 | Klasa | Odpowiedzialność |
 | --- | --- |
 | `MainReducer` (core) | Czysta funkcja przejść stanów ekranu głównego; zwraca listę efektów (mów, wibruj, zrób zdjęcie, wstrzymaj analizę…) |
-| `StabilityDetector` (core) | Na podstawie kolejnych `OcrFrame` z analizy stwierdza „tekst stabilny od ≥ 1 s” |
+| `StabilityDetector` (core) | Na podstawie kolejnych `OcrFrame` z analizy stwierdza „tekst stabilny od ≥ 0,5 s” |
 | `ReadMemory` (core) | Pamięta przeczytane bloki, mówi, które bloki w kadrze są nowe; „uzbraja” blok ponownie, gdy opuścił kadr |
 | `ReadPipeline` (core) | Dla wybranych bloków: kolejność → normalizacja → język → (tłumaczenie) → podział na fragmenty → `SpeechOutput` |
 | `MainViewModel` (app) | Łączy strumień klatek z reduktorem, wykonuje efekty w korutynach, udostępnia `StateFlow<MainUiState>` dla Compose |
@@ -90,7 +90,7 @@ i wykonuje efekty. Pakiet `pl.czytnik` jest roboczy – do potwierdzenia razem z
 flowchart LR
     subgraph Aparat
       P[Preview] 
-      A[ImageAnalysis<br/>~1280×720, co ~350 ms]
+      A[ImageAnalysis<br/>~1280×720, co ~250 ms]
       C[ImageCapture<br/>~2560×1440]
     end
     A --> O1[OCR łaciński<br/>klatka analizy]
@@ -112,7 +112,7 @@ flowchart LR
 
 Przebieg jednego odczytu (auto-odczyt):
 
-1. `ImageAnalysis` dostarcza klatki; `FrameAnalyzer` przepuszcza co najwyżej jedną na ~350 ms (strategia `KEEP_ONLY_LATEST`).
+1. `ImageAnalysis` dostarcza klatki; `FrameAnalyzer` przepuszcza co najwyżej jedną na ~250 ms (strategia `KEEP_ONLY_LATEST`).
 2. OCR na klatce analizy → `OcrFrame` (bloki z ramkami we współrzędnych znormalizowanych 0..1, po uwzględnieniu obrotu).
 3. `BlockFilter` odrzuca bloki ucięte krawędzią i zbyt krótkie; `ReadMemory` oznacza bloki już przeczytane.
 4. `StabilityDetector` zgłasza stabilność → reduktor przechodzi do `Processing` i emituje `CapturePhoto` oraz wibrację/sygnał.
@@ -276,8 +276,8 @@ nowego APK.
 
 | Parametr | Start | Uwagi |
 | --- | --- | --- |
-| `ANALYSIS_INTERVAL_MS` | 350 | PRD |
-| `STABLE_WINDOW_MS` | 1000 | PRD „ok. 1 s” |
+| `ANALYSIS_INTERVAL_MS` | 250 | było 350; skrócone 2026-10-09, żeby szybciej łapać tekst |
+| `STABLE_WINDOW_MS` | 500 | było 1000 (PRD „ok. 1 s”); skrócone 2026-10-09 – sygnał po ok. 0,5 s bezruchu |
 | `STABLE_MIN_FRAMES` | 3 | |
 | `STABLE_SIMILARITY` | 0,75 | obniżone z 0,85 w etapie 1: jeden błędny znak OCR w krótkim dymku daje podobieństwo ok. 0,83 |
 | `MAX_CENTER_SHIFT` | 0,08 | ułamek przekątnej |
@@ -484,7 +484,7 @@ Uruchamiane w chmurze (`./gradlew -p core test`) i w CI. Cel: pokrycie całej lo
 | Obszar | Przykładowe przypadki |
 | --- | --- |
 | `Similarity` | identyczne, drobny błąd OCR („0” vs „O”), różne teksty, puste |
-| `StabilityDetector` | 3 klatki podobne w 1 s → stabilny; przesunięcie środka > progu → reset; tekst znika → reset |
+| `StabilityDetector` | 3 klatki podobne w 0,5 s → stabilny; przesunięcie środka > progu → reset; tekst znika → reset |
 | `ReadMemory` | blok przeczytany nie wraca; wraca po `LEAVE_MS`; histereza (ucięty dymek trzyma blokadę); dymek podzielony na 2 bloki; **pauza zegara podczas mowy** |
 | `BlockFilter` | blok przy krawędzi pomijany, gdy jest pełny; wszystkie ucięte → brak odczytu + wskazówka |
 | `ReadingOrder` | dwie kolumny, kadry komiksu 2×2, pojedynczy blok |
@@ -677,7 +677,7 @@ Nie zrobione (świadomie, do decyzji po teście):
 | Czas ≤ 5 s / ≤ 7 s niespełniony na budżetowym telefonie | Średni | Średnie | Pomiar per krok; wyłączenie zdjęcia hi-res (D7); strumieniowe tłumaczenie |
 | Brak dobrego angielskiego/polskiego głosu na telefonie Damiana | Średni | Niskie | Komunikat + skrót do instalacji głosów; sprawdzić na jego telefonie w etapie 2 |
 | Podwójna mowa z TalkBack | Średni | Średnie | `Announcer` (D10), testy z TalkBack w etapie 5 |
-| Przegrzewanie / bateria przy ciągłej analizie | Niski | Średnie | Throttling 350 ms, pauza podczas mowy; ewentualnie wolniejsza analiza po 30 s bez tekstu |
+| Przegrzewanie / bateria przy ciągłej analizie | Niski | Średnie | Throttling 250 ms, pauza podczas mowy; ewentualnie wolniejsza analiza po 30 s bez tekstu |
 | Brak dostępu do Google Maven w chmurze – błędy buildu `app` widoczne dopiero w CI | Niski | Wysokie | Osobny build `core`; małe commity; CI na każdym pushu |
 | Różnice CameraX na urządzeniach (rozdzielczości, ZSL) | Niski | Średnie | Rozdzielczości jako cele z fallbackiem; testy na 3 telefonach |
 
@@ -728,7 +728,7 @@ Zastrzeżenia:
   zostaje domyślny.
 - Damian ma bardzo wąskie pole widzenia – trafienie palcem w mały dymek na ekranie telefonu może być trudne; stąd duże
   obrysy i powiększony obszar dotyku.
-- TalkBack: ramki zmieniają się co ~350 ms, więc nie wystawiamy ich jako osobnych elementów dostępności (fokus by
+- TalkBack: ramki zmieniają się co ~250 ms, więc nie wystawiamy ich jako osobnych elementów dostępności (fokus by
   skakał). Użytkownicy TalkBack zostają przy „cały podgląd = jeden przycisk”; wariant B mógłby wystawić dymki
   zamrożonego kadru jako listę elementów.
 

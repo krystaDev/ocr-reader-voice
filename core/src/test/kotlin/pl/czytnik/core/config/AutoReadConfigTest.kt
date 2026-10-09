@@ -9,8 +9,8 @@ class AutoReadConfigTest {
     @Test
     fun `defaults match the tech spec`() {
         val config = AutoReadConfig()
-        assertEquals(350, config.analysisIntervalMs)
-        assertEquals(1000, config.stableWindowMs)
+        assertEquals(250, config.analysisIntervalMs)
+        assertEquals(500, config.stableWindowMs)
         assertEquals(2000, config.leaveMs)
     }
 

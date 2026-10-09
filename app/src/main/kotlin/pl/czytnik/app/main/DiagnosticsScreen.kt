@@ -73,7 +73,7 @@ fun DiagnosticsScreen(vm: MainViewModel, onClose: () -> Unit) {
         BigButton("WYCZYŚĆ NAGRANIE", { vm.recorder.clear() }, modifier = Modifier.fillMaxWidth())
 
         Title("Parametry auto-odczytu")
-        Stepper("Czas bezruchu", "${config.stableWindowMs} ms", { update { it.copy(stableWindowMs = it.stableWindowMs - 250) } }, { update { it.copy(stableWindowMs = it.stableWindowMs + 250) } })
+        Stepper("Czas bezruchu", "${config.stableWindowMs} ms", { update { it.copy(stableWindowMs = it.stableWindowMs - 100) } }, { update { it.copy(stableWindowMs = it.stableWindowMs + 100) } })
         Stepper("Podobieństwo klatek", percent(config.stableSimilarity), { update { it.copy(stableSimilarity = round2(it.stableSimilarity - 0.05)) } }, { update { it.copy(stableSimilarity = round2(it.stableSimilarity + 0.05)) } })
         Stepper("Margines krawędzi", percent(config.edgeMargin), { update { it.copy(edgeMargin = round2(it.edgeMargin - 0.01)) } }, { update { it.copy(edgeMargin = round2(it.edgeMargin + 0.01)) } })
         Stepper("Zapominanie dymka", "${config.leaveMs} ms", { update { it.copy(leaveMs = it.leaveMs - 500) } }, { update { it.copy(leaveMs = it.leaveMs + 500) } })
