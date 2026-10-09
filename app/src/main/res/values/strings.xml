@@ -39,6 +39,7 @@
     <string name="settings_no_models">No downloaded translations.</string>
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
+    <string name="button_project_page">PROJECT WEBSITE</string>
     <string name="button_grant_access">ALLOW CAMERA</string>
     <string name="button_open_settings">OPEN SETTINGS</string>
     <string name="button_retry">TRY AGAIN</string>

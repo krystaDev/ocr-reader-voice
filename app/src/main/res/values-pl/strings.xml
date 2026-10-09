@@ -39,6 +39,7 @@
     <string name="settings_no_models">Brak pobranych tłumaczeń.</string>
     <string name="settings_about">O aplikacji</string>
     <string name="settings_version">Wersja %1$s</string>
+    <string name="button_project_page">STRONA PROJEKTU</string>
     <string name="button_grant_access">UDZIEL DOSTĘPU</string>
     <string name="button_open_settings">OTWÓRZ USTAWIENIA</string>
     <string name="button_retry">SPRÓBUJ PONOWNIE</string>

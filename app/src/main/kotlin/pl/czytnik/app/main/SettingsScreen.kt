@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.czytnik.app.BuildConfig
 import pl.czytnik.app.R
@@ -93,6 +94,7 @@ fun SettingsScreen(
 
         SectionTitle(stringResource(R.string.settings_about))
         SettingText(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
+        BigButton(stringResource(R.string.button_project_page), { context.openUrl(PROJECT_URL) }, modifier = Modifier.fillMaxWidth())
         BigButton(stringResource(R.string.button_diagnostics), onOpenDiagnostics, modifier = Modifier.fillMaxWidth())
     }
 }
@@ -132,6 +134,11 @@ private fun SectionTitle(text: String) =
 
 @Composable
 private fun SettingText(text: String) = Text(text, style = MaterialTheme.typography.bodyMedium, color = White)
+
+/** Strona projektu na GitHub Pages (site/ w repozytorium). */
+private const val PROJECT_URL = "https://krystadev.github.io/ocr-reader-voice/"
+
+private fun Context.openUrl(url: String) = startSafely(Intent(Intent.ACTION_VIEW, url.toUri()))
 
 private fun Context.startSafely(intent: Intent) {
     try {
