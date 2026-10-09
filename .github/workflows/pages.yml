@@ -1,0 +1,45 @@
+name: Strona (GitHub Pages)
+
+# Publikuje site/ razem z grafikami ze store/ pod https://krystadev.github.io/ocr-reader-voice/
+# Wymaga jednorazowo: Settings → Pages → Build and deployment → Source: GitHub Actions.
+on:
+  push:
+    paths:
+      - site/**
+      - store/screenshots/**
+      - store/feature-graphic.png
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Publikujemy tylko z gałęzi domyślnej; na innych gałęziach workflow się nie uruchamia.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Złóż stronę
+        run: |
+          mkdir -p _site/img
+          cp -r site/. _site/
+          cp store/screenshots/*.png store/feature-graphic.png _site/img/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

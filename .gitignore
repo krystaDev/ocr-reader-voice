@@ -6,3 +6,5 @@ local.properties
 *.iml
 .DS_Store
 captures/
+store/src/node_modules/
+store/src/package-lock.json

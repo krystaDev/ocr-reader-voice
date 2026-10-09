@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Czytnik Głosowy – grafiki do Sklepu Play</title>
+<!--
+  Odwzorowanie ekranów aplikacji 1:1 według kodu Compose (app/src/main/kotlin/pl/czytnik/app/main/*.kt):
+  1 px CSS = 1 dp, 1 px fontu = 1 sp. Kolory i typografia z ui/theme/Theme.kt, wymiary przycisków z Components.kt.
+  Telefon 432 × 768 dp renderowany ze skalą 2,5 → 1080 × 1920 px (9:16). Render: node render.mjs
+-->
+<style>
+  @font-face { font-family: Roboto; font-weight: 400; src: url(node_modules/@fontsource/roboto/files/roboto-latin-ext-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: Roboto; font-weight: 400; src: url(node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF; }
+  @font-face { font-family: Roboto; font-weight: 700; src: url(node_modules/@fontsource/roboto/files/roboto-latin-ext-700-normal.woff2) format("woff2"); }
+  @font-face { font-family: Roboto; font-weight: 700; src: url(node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF; }
+  @font-face { font-family: Comic; font-weight: 700; src: url(node_modules/@fontsource/comic-neue/files/comic-neue-latin-700-normal.woff2) format("woff2"); }
+
+  :root { --yellow: #FFD600; --black: #000; --white: #fff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #333; font-family: Roboto, sans-serif; display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; }
+
+  /* --- Telefon: pasek stanu 24 dp i pasek gestów 24 dp (WindowInsets.safeDrawing) --- */
+  .phone { width: 432px; height: 768px; background: var(--black); color: var(--white); display: flex; flex-direction: column; overflow: hidden; }
+  .sysbar { height: 24px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 14px; color: var(--white); }
+  .sysbar .icons { display: flex; gap: 6px; align-items: center; }
+  .navbar { height: 24px; flex: none; display: flex; align-items: center; justify-content: center; }
+  .navbar::after { content: ""; width: 108px; height: 4px; border-radius: 2px; background: #ddd; }
+
+  /* MainScreen: Column(padding 12 dp × 8 dp, spacedBy 8 dp) */
+  .main { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px 12px; }
+  .status { font-size: 26px; line-height: 34px; font-weight: 700; color: var(--yellow); }
+  .message { font-size: 22px; line-height: 30px; color: var(--white); }
+  .preview { flex: 1; min-height: 160px; position: relative; overflow: hidden; background: #111; }
+  .controls { flex: none; display: flex; flex-direction: column; gap: 8px; max-height: 476px; overflow: hidden; }
+  .spoken { font-size: 28px; line-height: 36px; max-height: 160px; overflow: hidden; }
+
+  /* Components.kt: BigButton / BigToggle, labelLarge 24 sp bold, zaokrąglenie 12 dp */
+  .btn { min-height: 76px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center;
+         font-size: 24px; line-height: 30px; font-weight: 700; padding: 8px 24px; overflow-wrap: anywhere; }
+  .btn.primary { background: var(--yellow); color: var(--black); min-height: 96px; }
+  .btn.back { min-height: 76px; }
+  .btn.outline { border: 3px solid var(--white); color: var(--white); }
+  .toggle { min-height: 76px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 24px; line-height: 30px; font-weight: 700; padding: 8px 12px; border: 3px solid var(--white); color: var(--white); }
+  .toggle.on { background: var(--yellow); border-color: var(--yellow); color: var(--black); }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; min-width: 0; }
+
+  /* SettingsScreen: Column(padding 12 dp, spacedBy 12 dp) */
+  .settings { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow: hidden; }
+  .settings.list { gap: 8px; }
+  .section { font-size: 26px; line-height: 34px; font-weight: 700; color: var(--yellow); }
+  .text { font-size: 22px; line-height: 30px; }
+
+  /* Żółte obrysy wykrytych bloków (BlocksOverlay, 4 dp) */
+  .block { position: absolute; border: 4px solid var(--yellow); }
+
+  /* --- Sceny „z aparatu” --- */
+  .scene { position: absolute; inset: 0; }
+  .scene::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.45)); pointer-events: none; }
+  .table { background: linear-gradient(160deg, #6b4f37, #4a3524 60%, #3a2a1d); }
+  .leaflet { position: absolute; left: 50px; top: 10px; width: 330px; padding: 18px 20px; background: linear-gradient(170deg, #fbfaf6, #ecebe5);
+             color: #1b1b1b; transform: rotate(-2.5deg); box-shadow: 0 8px 18px rgba(0,0,0,.5); font-family: Roboto, sans-serif; filter: blur(.35px); }
+  .leaflet h3 { font-size: 21px; line-height: 25px; letter-spacing: .5px; }
+  .leaflet .sub { font-size: 12px; color: #444; margin: 2px 0 8px; }
+  .leaflet p { font-size: 13px; line-height: 17px; margin-top: 6px; }
+  .leaflet p.ocr { font-size: 15px; line-height: 19px; font-weight: 700; margin-top: 14px; }
+  .leaflet .red { height: 6px; background: #c62828; margin: -18px -20px 12px; }
+
+  .menu { position: absolute; left: 46px; top: 18px; width: 305px; padding: 18px 22px 24px; background: #f4ecd8; color: #2b1d0e; transform: rotate(1.8deg);
+          box-shadow: 0 8px 18px rgba(0,0,0,.5); font-family: Georgia, serif; filter: blur(.3px); }
+  .menu h3 { text-align: center; font-size: 22px; letter-spacing: 3px; margin-bottom: 4px; }
+  .menu .rule { height: 1px; background: #8a6d3b; margin: 6px 0 10px; }
+  .menu .item { display: flex; justify-content: space-between; font-size: 15px; line-height: 22px; }
+  .menu .note { font-size: 11px; color: #6b5532; margin-top: 8px; font-style: italic; }
+
+  .tablet { background: #1d1d22; }
+  .tablet .screen { position: absolute; left: 18px; top: 14px; right: 18px; bottom: 14px; background: #0c0c10; border-radius: 10px; padding: 10px; overflow: hidden; }
+  .panel { position: absolute; border: 3px solid #111; overflow: hidden; }
+  .panel.a { left: 10px; top: 10px; right: 10px; height: 56%; background: linear-gradient(180deg, #2b4a8b, #4c6fb8 60%, #c9a46a); }
+  .panel.b { left: 10px; bottom: 10px; width: 48%; top: calc(56% + 16px); background: linear-gradient(135deg, #8b2b2b, #d1603d); }
+  .panel.c { right: 10px; bottom: 10px; width: calc(52% - 26px); top: calc(56% + 16px); background: linear-gradient(135deg, #2d6a4f, #95d5b2); }
+  .skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 40%; background:
+      linear-gradient(90deg, #0d1b33 0 12%, transparent 12% 15%, #142847 15% 30%, transparent 30% 33%, #0d1b33 33% 47%, transparent 47% 50%, #142847 50% 70%, transparent 70% 73%, #0d1b33 73% 100%); }
+  .figure { position: absolute; width: 46px; height: 92px; border-radius: 23px 23px 6px 6px; background: #1a1a1a; }
+  .bubble { position: absolute; background: #fff; color: #111; border: 2.5px solid #111; border-radius: 50%; font-family: Comic, sans-serif; font-weight: 700;
+            text-align: center; display: flex; align-items: center; justify-content: center; filter: blur(.3px); }
+  .bubble::after { content: ""; position: absolute; bottom: -14px; left: 30%; border: 9px solid transparent; border-top: 16px solid #111; border-bottom: 0; }
+  .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.07) 45%, transparent 55%); }
+
+  /* --- Grafika promocyjna 1024 × 500 i ikona 512 × 512 --- */
+  .feature { width: 1024px; height: 500px; background: var(--black); position: relative; overflow: hidden; font-family: Roboto, sans-serif; color: var(--white); }
+  .feature .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+  .feature .name { font-size: 64px; line-height: 72px; font-weight: 700; color: var(--yellow); }
+  .feature .tag { font-size: 34px; line-height: 44px; font-weight: 700; }
+  .feature .points { font-size: 24px; line-height: 34px; color: #e6e6e6; }
+  .feature .mini { position: absolute; right: 72px; top: 50%; transform: translateY(-50%) rotate(4deg); width: 280px; height: 420px; border-radius: 28px;
+                   border: 6px solid #2a2a2a; background: #000; overflow: hidden; box-shadow: 0 0 0 2px #444, 0 30px 60px rgba(255,214,0,.12); }
+  .icon512 { width: 512px; height: 512px; background: var(--black); }
+</style>
+</head>
+<body>
+
+<!-- Ikona aplikacji (wspólny rysunek: ikona 512, grafika promocyjna, favicon strony) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="logo" viewBox="0 0 512 512">
+      <rect x="92" y="96" width="232" height="300" rx="28" fill="#FFD600"/>
+      <rect x="132" y="150" width="152" height="24" rx="12" fill="#000"/>
+      <rect x="132" y="206" width="152" height="24" rx="12" fill="#000"/>
+      <rect x="132" y="262" width="110" height="24" rx="12" fill="#000"/>
+      <rect x="132" y="318" width="132" height="24" rx="12" fill="#000"/>
+      <path d="M362 196 a90 90 0 0 1 0 120" fill="none" stroke="#FFD600" stroke-width="28" stroke-linecap="round"/>
+      <path d="M402 152 a150 150 0 0 1 0 208" fill="none" stroke="#FFD600" stroke-width="28" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<template id="sysbar">
+  <div class="sysbar"><span>12:30</span><span class="icons">
+    <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 12 0 3.5a11.5 11.5 0 0 1 16 0z" fill="#fff"/></svg>
+    <svg width="9" height="15" viewBox="0 0 9 15"><rect x="2.5" y="0" width="4" height="2" fill="#fff"/><rect x="0" y="2" width="9" height="13" rx="1.5" fill="#fff"/></svg>
+  </span></div>
+</template>
+
+<!-- 1. Czyta ulotkę leku -->
+<div class="phone" id="shot-1">
+  <div class="sysbar-slot"></div>
+  <div class="main">
+    <div class="status">Czytam</div>
+    <div class="preview">
+      <div class="scene table">
+        <div class="leaflet">
+          <div class="red"></div>
+          <h3>PARACETAMOL 500 mg</h3>
+          <div class="sub">tabletki · 20 szt.</div>
+          <p><b>Dawkowanie:</b> 1–2 tabletki do 4 razy na dobę.</p>
+          <p class="ocr">Nie stosować więcej niż 8 tabletek na dobę.</p>
+                  </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="spoken">Nie stosować więcej niż 8 tabletek na dobę.</div>
+      <div class="btn primary">POWTÓRZ</div>
+      <div class="toggle">TŁUMACZ: WYŁĄCZONE</div>
+      <div class="row"><div class="btn outline">WOLNIEJ</div><div class="btn outline">SZYBCIEJ</div></div>
+      <div class="row"><div class="toggle">LATARKA: WYŁĄCZONE</div><div class="btn outline">USTAWIENIA</div></div>
+    </div>
+  </div>
+  <div class="navbar"></div>
+</div>
+
+<!-- 2. Komiks na tablecie, czytany po polsku -->
+<div class="phone" id="shot-2">
+  <div class="sysbar-slot"></div>
+  <div class="main">
+    <div class="status">Czytam</div>
+    <div class="message">Tłumaczenie włączone.</div>
+    <div class="preview">
+      <div class="scene tablet">
+        <div class="screen">
+          <div class="panel a">
+            <div class="skyline"></div>
+            <div class="figure" style="left:58%; bottom:6px"></div>
+            <div class="bubble" style="left:16px; top:10px; width:190px; height:84px; font-size:16px; line-height:19px"><span class="ocr">WHO ARE YOU<br>REALLY?</span></div>
+          </div>
+          <div class="panel b"></div>
+          <div class="panel c"></div>
+          <div class="glare"></div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="spoken">Kim naprawdę jesteś?</div>
+      <div class="btn primary">POWTÓRZ</div>
+      <div class="toggle on">TŁUMACZ: WŁĄCZONE</div>
+      <div class="row"><div class="btn outline">WOLNIEJ</div><div class="btn outline">SZYBCIEJ</div></div>
+      <div class="row"><div class="toggle">LATARKA: WYŁĄCZONE</div><div class="btn outline">USTAWIENIA</div></div>
+    </div>
+  </div>
+  <div class="navbar"></div>
+</div>
+
+<!-- 3. Pierwsze uruchomienie: aparat od razu szuka tekstu -->
+<div class="phone" id="shot-3">
+  <div class="sysbar-slot"></div>
+  <div class="main">
+    <div class="status">Widzę tekst</div>
+    <div class="message">Czytnik gotowy. Skieruj aparat na tekst.</div>
+    <div class="preview">
+      <div class="scene table" style="background:linear-gradient(160deg,#3c3c3c,#262626)">
+        <div class="menu">
+          <h3>MENU</h3>
+          <div class="rule"></div>
+          <div class="ocr">
+          <div class="item"><span>Żurek z jajkiem</span><span>18 zł</span></div>
+          <div class="item"><span>Pierogi ruskie</span><span>26 zł</span></div>
+          <div class="item"><span>Schabowy z ziemniakami</span><span>39 zł</span></div>
+          <div class="item"><span>Sernik domowy</span><span>16 zł</span></div>
+          <div class="item"><span>Kompot</span><span>8 zł</span></div>
+          </div>
+          <div class="note">Informacji o alergenach udziela obsługa.</div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="btn primary">POWTÓRZ</div>
+      <div class="toggle">TŁUMACZ: WYŁĄCZONE</div>
+      <div class="row"><div class="btn outline">WOLNIEJ</div><div class="btn outline">SZYBCIEJ</div></div>
+      <div class="row"><div class="toggle">LATARKA: WYŁĄCZONE</div><div class="btn outline">USTAWIENIA</div></div>
+    </div>
+  </div>
+  <div class="navbar"></div>
+</div>
+
+<!-- 4. Ustawienia -->
+<div class="phone" id="shot-4">
+  <div class="sysbar-slot"></div>
+  <div class="settings">
+    <div class="btn primary back">WRÓĆ</div>
+    <div class="section">Ustawienia</div>
+    <div class="text">Tłumacz na: polski</div>
+    <div class="btn outline">ZMIEŃ JĘZYK</div>
+    <div class="toggle on">CZYTAJ SAMO: WŁĄCZONE</div>
+    <div class="toggle">LATARKA SAMA: WYŁĄCZONE</div>
+    <div class="text">Tempo 1</div>
+    <div class="row"><div class="btn outline">WOLNIEJ</div><div class="btn outline">SZYBCIEJ</div></div>
+    <div class="section">Głosy</div>
+    <div class="btn outline">ZAINSTALUJ GŁOSY</div>
+    <div class="btn outline">USTAWIENIA MOWY</div>
+  </div>
+  <div class="navbar"></div>
+</div>
+
+<!-- 5. Wybór języka tłumaczenia -->
+<div class="phone" id="shot-5">
+  <div class="sysbar-slot"></div>
+  <div class="settings list">
+    <div class="btn primary back">WRÓĆ</div>
+    <div class="section">Na jaki język tłumaczyć?</div>
+    <div class="toggle">Angielski: NIEWYBRANY</div>
+    <div class="toggle">Francuski: NIEWYBRANY</div>
+    <div class="toggle">Hiszpański: NIEWYBRANY</div>
+    <div class="toggle">Niemiecki: NIEWYBRANY</div>
+    <div class="toggle on">Polski: WYBRANY</div>
+    <div class="toggle">Ukraiński: NIEWYBRANY</div>
+    <div class="toggle">Włoski: NIEWYBRANY</div>
+  </div>
+  <div class="navbar"></div>
+</div>
+
+<!-- Grafika promocyjna 1024 × 500 -->
+<div class="feature" id="feature">
+  <div class="copy">
+    <svg width="120" height="120" style="margin-left:-20px"><use href="#logo"/></svg>
+    <div class="name">Czytnik Głosowy</div>
+    <div class="tag">Skieruj aparat – usłyszysz tekst.</div>
+    <div class="points">Czyta samo · Tłumaczy · Duże przyciski</div>
+  </div>
+  <div class="mini" id="mini"></div>
+</div>
+
+<!-- Ikona 512 × 512 (Sklep Play sam zaokrągla rogi) -->
+<div class="icon512" id="icon"><svg width="512" height="512"><use href="#logo"/></svg></div>
+
+<script>
+  const bar = document.getElementById('sysbar').content;
+  document.querySelectorAll('.sysbar-slot').forEach(slot => slot.replaceWith(bar.cloneNode(true)));
+  // Żółte ramki jak BlocksOverlay: prostokąt obejmujący rozpoznany blok (.ocr), w układzie podglądu.
+  document.querySelectorAll('.preview').forEach(preview => {
+    const origin = preview.getBoundingClientRect();
+    preview.querySelectorAll('.ocr').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const box = document.createElement('div');
+      box.className = 'block';
+      Object.assign(box.style, { left: `${r.left - origin.left - 6}px`, top: `${r.top - origin.top - 6}px`, width: `${r.width + 12}px`, height: `${r.height + 12}px` });
+      preview.appendChild(box);
+    });
+  });
+  // Miniatura ekranu 1 w grafice promocyjnej (432 × 768 dp → 268 × 476 px).
+  const mini = document.getElementById('shot-1').cloneNode(true);
+  mini.id = '';
+  mini.style.transform = 'scale(0.62)';
+  mini.style.transformOrigin = 'top left';
+  document.getElementById('mini').appendChild(mini);
+</script>
+</body>
+</html>
