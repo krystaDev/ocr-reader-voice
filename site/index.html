@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Czytnik Głosowy – aplikacja, która czyta na głos tekst z aparatu</title>
+<meta name="description" content="Czytnik Głosowy to aplikacja na Androida dla osób słabowidzących: skieruj aparat na tekst, a telefon sam przeczyta go na głos, w razie potrzeby po przetłumaczeniu.">
+<meta property="og:title" content="Czytnik Głosowy">
+<meta property="og:description" content="Skieruj aparat – usłyszysz tekst. Aplikacja na Androida dla osób słabowidzących.">
+<meta property="og:image" content="img/feature-graphic.png">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#tresc">Przejdź do treści</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="favicon.svg" alt="">Czytnik Głosowy</a>
+    <nav aria-label="Menu">
+      <ul>
+        <li><a href="#funkcje">Funkcje</a></li>
+        <li><a href="#jak">Jak to działa</a></li>
+        <li><a href="privacy.html">Prywatność</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="tresc">
+  <section>
+    <div class="wrap hero">
+      <div>
+        <h1>Skieruj aparat – usłyszysz tekst.</h1>
+        <p class="lead">Aplikacja na Androida, która sama czyta na głos tekst widoczny w aparacie. Bez szukania przycisków.</p>
+        <p>Ulotka leku, rachunek, etykieta, menu w restauracji, dymek w komiksie. Wystarczy przytrzymać telefon nad tekstem – aplikacja da krótki sygnał i zacznie czytać. Jeśli tekst jest w obcym języku, może go od razu przetłumaczyć.</p>
+        <div class="actions">
+          <a class="button primary" href="#jak">Jak to działa</a>
+          <a class="button" href="https://github.com/krystaDev/ocr-reader-voice">Kod źródłowy</a>
+        </div>
+        <span class="badge">Wkrótce w Google Play</span>
+      </div>
+      <img class="phone" src="img/phone-1.png" width="1080" height="1920" alt="Ekran aplikacji: nad ulotką leku żółta ramka wokół zdania „Nie stosować więcej niż 8 tabletek na dobę”, poniżej ten sam tekst dużą czcionką i duże przyciski Powtórz, Tłumacz, Wolniej, Szybciej.">
+    </div>
+  </section>
+
+  <section id="funkcje">
+    <div class="wrap">
+      <h2>Funkcje</h2>
+      <div class="grid">
+        <div class="card"><h3>Czyta samo</h3><p>Aparat startuje od razu. Gdy tekst w kadrze się ustabilizuje, aplikacja sama zaczyna czytać – bez dotykania ekranu.</p></div>
+        <div class="card"><h3>Tłumaczy</h3><p>Tekst w obcym języku może przeczytać po polsku (lub w innym wybranym języku). Tłumaczenie działa na telefonie.</p></div>
+        <div class="card"><h3>Duże przyciski</h3><p>Żółte i białe przyciski na czarnym tle, duży tekst, wysoki kontrast. Dotknięcie podglądu zatrzymuje mowę albo czyta od razu.</p></div>
+        <div class="card"><h3>Zgodna z TalkBack</h3><p>Podpowiedzi głosowe i wibracje pomagają nakierować aparat także osobom niewidomym.</p></div>
+        <div class="card"><h3>Nie powtarza się</h3><p>Ten sam tekst jest czytany raz. Żeby usłyszeć go ponownie, wystarczy przycisk „Powtórz”.</p></div>
+        <div class="card"><h3>Prywatna</h3><p>Rozpoznawanie tekstu odbywa się na telefonie. Aplikacja nie wysyła zdjęć ani tekstu, nie ma kont ani reklam.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="jak">
+    <div class="wrap">
+      <h2>Jak to działa</h2>
+      <ol class="steps">
+        <li><div><h3>Uruchom aplikację</h3>Aparat włącza się od razu, aplikacja wita krótkim komunikatem.</div></li>
+        <li><div><h3>Skieruj aparat na tekst</h3>Podpowiedzi głosowe i wibracje mówią, czy odsunąć telefon albo trzymać go nieruchomo.</div></li>
+        <li><div><h3>Posłuchaj</h3>Krótki sygnał – i aplikacja czyta tekst na głos, w naturalnej kolejności, od góry do dołu.</div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="ekrany">
+    <div class="wrap">
+      <h2>Ekrany</h2>
+      <div class="shots">
+        <figure><img src="img/phone-1.png" width="1080" height="1920" loading="lazy" alt="Czytanie ulotki leku"><figcaption>Czytanie ulotki leku</figcaption></figure>
+        <figure><img src="img/phone-2.png" width="1080" height="1920" loading="lazy" alt="Angielski dymek komiksu czytany po polsku: Kim naprawdę jesteś?"><figcaption>Komiks po angielsku, czytany po polsku</figcaption></figure>
+        <figure><img src="img/phone-3.png" width="1080" height="1920" loading="lazy" alt="Aparat widzi menu restauracji"><figcaption>Aparat od razu szuka tekstu</figcaption></figure>
+        <figure><img src="img/phone-4.png" width="1080" height="1920" loading="lazy" alt="Ekran ustawień z dużymi przyciskami"><figcaption>Ustawienia</figcaption></figure>
+        <figure><img src="img/phone-5.png" width="1080" height="1920" loading="lazy" alt="Wybór języka tłumaczenia"><figcaption>Wybór języka tłumaczenia</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="dla-kogo">
+    <div class="wrap">
+      <h2>Dla kogo</h2>
+      <div class="grid">
+        <div class="card"><h3>Osoby słabowidzące</h3><p>Drobny druk na ulotkach, etykietach i rachunkach.</p></div>
+        <div class="card"><h3>Osoby niewidome</h3><p>Pełna obsługa z TalkBack, wskazówki dźwiękiem i wibracją.</p></div>
+        <div class="card"><h3>Trudności z czytaniem</h3><p>Dysleksja, afazja, seniorzy, dzieci – tekst czytany na głos i pokazany dużą czcionką.</p></div>
+        <div class="card"><h3>Obcy język</h3><p>Instrukcje, menu, szyldy i komiksy przeczytane w Twoim języku.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <ul>
+      <li><a href="privacy.html">Polityka prywatności</a></li>
+      <li><a href="privacy.html#en">Privacy policy (English)</a></li>
+      <li><a href="https://github.com/krystaDev/ocr-reader-voice">GitHub</a></li>
+      <li><a href="https://github.com/krystaDev/ocr-reader-voice/issues">Kontakt i zgłoszenia</a></li>
+    </ul>
+    <p>Czytnik Głosowy · © 2026 krystaDev</p>
+  </div>
+</footer>
+</body>
+</html>

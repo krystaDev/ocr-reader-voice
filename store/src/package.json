@@ -1,0 +1,10 @@
+{
+  "name": "czytnik-store-assets",
+  "private": true,
+  "description": "Grafiki do Sklepu Play renderowane z HTML (node render.mjs)",
+  "type": "module",
+  "dependencies": {
+    "@fontsource/comic-neue": "5.1.0",
+    "@fontsource/roboto": "5.1.0"
+  }
+}
