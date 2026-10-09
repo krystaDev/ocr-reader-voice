@@ -53,8 +53,8 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
-        // Release z R8, ale podpisany wspólnym kluczem debug: instaluje się na wersję testową, żeby sprawdzić na
-        // telefonie, czy R8 niczego nie zepsuł (Google Play nie przyjmie tego pliku).
+        // Release z R8, ale podpisany wspólnym kluczem debug: ./gradlew :app:installR8test instaluje go na wersję
+        // testową, żeby sprawdzić na telefonie, czy R8 niczego nie zepsuł (Google Play nie przyjmie tego pliku).
         create("r8test") {
             initWith(getByName("release"))
             signingConfig = signingConfigs.getByName("debug")
