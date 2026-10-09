@@ -95,8 +95,6 @@ fun SettingsScreen(
         SectionTitle(stringResource(R.string.settings_about))
         SettingText(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
         BigButton(stringResource(R.string.button_project_page), { context.openUrl(PROJECT_URL) }, modifier = Modifier.fillMaxWidth())
-        val privacyUrl = stringResource(R.string.privacy_policy_url)
-        BigButton(stringResource(R.string.button_privacy_policy), { context.openUrl(privacyUrl) }, modifier = Modifier.fillMaxWidth())
         BigButton(stringResource(R.string.button_diagnostics), onOpenDiagnostics, modifier = Modifier.fillMaxWidth())
     }
 }
