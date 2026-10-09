@@ -31,8 +31,8 @@
   <h2>W skrócie</h2>
   <ul>
     <li>Obraz z aparatu jest analizowany <strong>tylko na Twoim telefonie</strong>. Aplikacja nie zapisuje zdjęć i nie wysyła ich ani rozpoznanego tekstu na żaden serwer.</li>
-    <li>Aplikacja nie ma kont użytkowników, reklam ani narzędzi analitycznych i nie sprzedaje żadnych danych.</li>
-    <li>Internet jest potrzebny tylko do pobrania modeli tłumaczenia od Google.</li>
+    <li>Aplikacja nie ma kont użytkowników ani reklam, a jej twórca nie zbiera i nie sprzedaje żadnych danych.</li>
+    <li>Internet jest potrzebny do pobrania modeli tłumaczenia od Google. Biblioteka Google ML Kit wysyła też do Google techniczne dane diagnostyczne (szczegóły niżej).</li>
   </ul>
 
   <h2>Kto odpowiada za aplikację</h2>
@@ -57,10 +57,17 @@
   </ul>
 
   <h2>Dane przesyłane do Google (ML Kit)</h2>
-  <p>Aplikacja korzysta z bibliotek Google ML Kit. Podczas pobierania modeli tłumaczenia telefon łączy się z serwerami Google. ML Kit może też wysyłać do Google techniczne dane diagnostyczne o działaniu biblioteki, np. model urządzenia, wersję Androida, wersję aplikacji i biblioteki, czas działania i kody błędów. Nie są to obrazy z aparatu ani rozpoznany tekst. Google przetwarza te dane zgodnie z <a href="https://policies.google.com/privacy">Polityką prywatności Google</a>.</p>
+  <p>Aplikacja korzysta z bibliotek Google ML Kit (rozpoznawanie tekstu, wykrywanie języka, tłumaczenie). Podczas pobierania modeli tłumaczenia telefon łączy się z serwerami Google. Według <a href="https://developers.google.com/ml-kit/android-data-disclosure">dokumentacji Google</a> ML Kit wysyła też do Google, w celach diagnostycznych i statystyki użycia:</p>
+  <ul>
+    <li>informacje o urządzeniu (producent, model, wersja systemu) i o aplikacji (identyfikator pakietu, wersja),</li>
+    <li>identyfikatory instalacji, które nie służą do rozpoznania użytkownika ani konkretnego urządzenia (m.in. przez usługi Firebase Installations i Firebase Remote Config używane przez tłumaczenie),</li>
+    <li>dane techniczne: czas działania, konfigurację (np. rozdzielczość obrazu), rozmiar danych wejściowych i wyjściowych, rodzaj zdarzenia, kody błędów, wersję biblioteki,</li>
+    <li>wykryty język tekstu oraz wybrane języki tłumaczenia (np. „angielski → polski”).</li>
+  </ul>
+  <p>Nie są to obrazy z aparatu ani rozpoznany lub przetłumaczony tekst. Dane są szyfrowane podczas przesyłania (HTTPS), Google nie przekazuje ich podmiotom trzecim i przetwarza je zgodnie z <a href="https://policies.google.com/privacy">Polityką prywatności Google</a>. Twórca aplikacji nie ma do nich dostępu.</p>
 
   <h2>Udostępnianie danych</h2>
-  <p>Aplikacja nie udostępnia danych osobowych żadnym podmiotom, poza opisanymi wyżej usługami Google działającymi w telefonie i przy pobieraniu modeli.</p>
+  <p>Aplikacja nie udostępnia danych żadnym podmiotom poza opisanym wyżej przesyłaniem danych diagnostycznych do Google przez bibliotekę ML Kit.</p>
 
   <h2>Przechowywanie i usuwanie</h2>
   <p>Ustawienia i pobrane modele tłumaczenia są w pamięci telefonu. Modele możesz usunąć w Ustawieniach aplikacji („Pobrane tłumaczenia”). Wszystkie dane aplikacji usuniesz, czyszcząc jej dane w ustawieniach Androida albo odinstalowując aplikację. Twórca aplikacji nie przechowuje żadnych Twoich danych, więc nie ma czego usuwać po jego stronie.</p>
@@ -69,7 +76,7 @@
   <p>Aplikacja nie jest skierowana specjalnie do dzieci i nie zbiera świadomie danych dzieci.</p>
 
   <h2>Twoje prawa</h2>
-  <p>Na podstawie RODO masz prawo m.in. do dostępu do danych, ich sprostowania, usunięcia i wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych. Ponieważ twórca aplikacji nie zbiera Twoich danych, w praktyce wszystkie dane pozostają pod Twoją kontrolą na telefonie.</p>
+  <p>Na podstawie RODO masz prawo m.in. do dostępu do danych, ich sprostowania, usunięcia i wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych. Ponieważ twórca aplikacji nie zbiera Twoich danych, w praktyce dane aplikacji pozostają pod Twoją kontrolą na telefonie; w sprawie danych diagnostycznych ML Kit możesz zwrócić się do Google.</p>
 
   <h2>Zmiany polityki</h2>
   <p>O zmianach poinformujemy na tej stronie, zmieniając datę „Obowiązuje od”. Historia zmian jest widoczna w <a href="https://github.com/krystaDev/ocr-reader-voice/commits/HEAD/site/privacy.html">repozytorium projektu</a>.</p>
@@ -83,8 +90,8 @@
     <h2>Summary</h2>
     <ul>
       <li>Camera images are analysed <strong>only on your phone</strong>. The app does not save photos and does not send them, or the recognised text, to any server.</li>
-      <li>The app has no user accounts, ads or analytics, and does not sell any data.</li>
-      <li>Internet access is used only to download translation models from Google.</li>
+      <li>The app has no user accounts or ads, and its developer does not collect or sell any data.</li>
+      <li>Internet access is used to download translation models from Google. The Google ML Kit library also sends technical diagnostics to Google (details below).</li>
     </ul>
 
     <h2>Who is responsible</h2>
@@ -109,10 +116,17 @@
     </ul>
 
     <h2>Data sent to Google (ML Kit)</h2>
-    <p>The app uses Google ML Kit libraries. When downloading translation models the phone connects to Google servers. ML Kit may also send Google technical diagnostics about the library, such as device model, Android version, app and library version, latency and error codes. This does not include camera images or recognised text. Google processes this data under the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+    <p>The app uses Google ML Kit libraries (text recognition, language identification, translation). When downloading translation models the phone connects to Google servers. According to <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google's documentation</a>, ML Kit also sends Google the following for diagnostics and usage analytics:</p>
+    <ul>
+      <li>device information (manufacturer, model, OS version) and app information (package name, version),</li>
+      <li>per-installation identifiers that are not intended to identify a user or a physical device (including through Firebase Installations and Firebase Remote Config, used by translation),</li>
+      <li>technical data: latency, configuration (e.g. image resolution), input and output size, event type, error codes, library version,</li>
+      <li>the identified language of the text and the chosen translation languages (e.g. “English → Polish”).</li>
+    </ul>
+    <p>This does not include camera images or recognised or translated text. The data is encrypted in transit (HTTPS), is not shared by Google with third parties, and is processed under the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. The developer has no access to it.</p>
 
     <h2>Sharing</h2>
-    <p>The app does not share personal data with anyone other than the Google services described above.</p>
+    <p>The app does not share data with anyone other than the diagnostics sent to Google by ML Kit, described above.</p>
 
     <h2>Retention and deletion</h2>
     <p>Settings and downloaded translation models stay on the phone. Models can be removed in the app's Settings (“Downloaded translations”). All app data is removed by clearing the app's data in Android settings or uninstalling the app. The developer does not store any of your data, so there is nothing to delete on the developer's side.</p>
@@ -121,7 +135,7 @@
     <p>The app is not specifically directed at children and does not knowingly collect children's data.</p>
 
     <h2>Your rights</h2>
-    <p>Under the GDPR you have the right to access, rectify and erase your data and to lodge a complaint with a supervisory authority. Since the developer does not collect your data, it stays under your control on your phone.</p>
+    <p>Under the GDPR you have the right to access, rectify and erase your data and to lodge a complaint with a supervisory authority. Since the developer does not collect your data, app data stays under your control on your phone; for ML Kit diagnostics you can contact Google.</p>
 
     <h2>Changes</h2>
     <p>Changes will be published on this page with a new effective date. The change history is visible in the <a href="https://github.com/krystaDev/ocr-reader-voice/commits/HEAD/site/privacy.html">project repository</a>.</p>
