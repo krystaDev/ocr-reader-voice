@@ -586,8 +586,10 @@ Rozmiar: bundled OCR łaciński + Language ID to kilka MB na ABI; uniwersalne de
   3. `./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug`;
   4. `actions/upload-artifact`: `app/build/outputs/apk/debug/*.apk` jako `czytnik-glosowy-debug-<krótki SHA>`,
      retencja 30 dni; raporty testów i lint jako osobny artefakt przy niepowodzeniu.
-- `versionCode = github.run_number`, `versionName = "0.<etap>.0-<krótki SHA>"` – widać w Ustawieniach, co jest
-  zainstalowane.
+- `versionCode = github.run_number` (lokalnie `-PversionCode=<n>`), `versionName = "1.0.0"` ustawiane ręcznie przy
+  wydaniu; wersje debug mają przyrostek `-<run>-<krótki SHA>` – widać w Ustawieniach, co jest zainstalowane.
+- **Release**: R8 (`isMinifyEnabled`, `isShrinkResources`, `app/proguard-rules.pro`). Typ `r8test` – release z R8
+  podpisany kluczem debug – służy do sprawdzenia na telefonie (`./gradlew :app:installR8test`).
 - **Podpis**: `app/debug.keystore` w repozytorium (klucz debug, nie jest tajny) i jawnie wskazany w `signingConfigs.debug`.
   Bez tego każdy runner generuje inny klucz i kolejne APK nie instalują się na poprzednie.
 - **Dostarczenie Damianowi (decyzja 2026-09-26)**: APK pobrane z artefaktu CI przekazujemy **linkiem** (np. Dysk

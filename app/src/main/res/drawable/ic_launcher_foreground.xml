@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ikona: narożniki kadru aparatu wokół liter „Aa” (store/src/screens.html, symbol #logo). Siatka ikony adaptacyjnej
+     108 × 108 dp; motyw mieści się w bezpiecznym kole 66 dp. Litery to kontury Roboto Bold. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M35 43V35H43M65 35H73V43M73 65V73H65M43 73H35V65"
+        android:strokeColor="#FFD600"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50.65 58.98H44.48L43.31 62.5H39.57L45.93 45.44H49.18L55.57 62.5H51.83ZM45.43 56.14H49.7L47.55 49.75ZM64.29 62.5Q64.05 62.04 63.95 61.36Q62.72 62.73 60.75 62.73Q58.89 62.73 57.66 61.66Q56.44 60.58 56.44 58.94Q56.44 56.92 57.93 55.84Q59.43 54.77 62.25 54.75H63.81V54.03Q63.81 53.15 63.36 52.62Q62.91 52.09 61.93 52.09Q61.08 52.09 60.59 52.5Q60.11 52.91 60.11 53.63H56.72Q56.72 52.53 57.4 51.59Q58.08 50.65 59.32 50.12Q60.56 49.59 62.11 49.59Q64.45 49.59 65.83 50.76Q67.21 51.94 67.21 54.07V59.57Q67.22 61.38 67.71 62.3V62.5ZM61.49 60.14Q62.24 60.14 62.87 59.81Q63.5 59.48 63.81 58.91V56.73H62.54Q60 56.73 59.84 58.49L59.82 58.69Q59.82 59.32 60.27 59.73Q60.71 60.14 61.49 60.14Z" />
+</vector>

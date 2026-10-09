@@ -15,4 +15,4 @@
 5. **Głosy** – jeśli aplikacja mówi „Brak głosu…”, w Ustawieniach aplikacji: ZAINSTALUJ GŁOSY (np. angielski i polski
    w Usługach mowy Google).
 
-Wersję zainstalowanej aplikacji widać w Ustawienia → O aplikacji (`0.0.<numer buildu>-<commit>`).
+Wersję zainstalowanej aplikacji widać w Ustawienia → O aplikacji (`1.0.0-<numer buildu>-<commit>`).
