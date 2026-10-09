@@ -48,15 +48,17 @@ android {
             versionNameSuffix = "-$appVersionCode-$ciShortSha"
         }
         release {
-            // R8: usuwa nieużywany kod i zasoby, zmniejsza APK/AAB.
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // R8 wyłączony: z nim aplikacja nie startowała na telefonie (bez wyjątku w logcat). Przyczynę szukamy
+            // w wariancie r8test; po naprawie włączyć tu isMinifyEnabled i isShrinkResources.
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
-        // Release z R8, ale podpisany wspólnym kluczem debug: ./gradlew :app:installR8test instaluje go na wersję
+        // Release z R8, podpisany wspólnym kluczem debug: ./gradlew :app:installR8test instaluje go na wersję
         // testową, żeby sprawdzić na telefonie, czy R8 niczego nie zepsuł (Google Play nie przyjmie tego pliku).
         create("r8test") {
             initWith(getByName("release"))
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("debug")
             versionNameSuffix = "-r8-$appVersionCode-$ciShortSha"
             matchingFallbacks += "release"
