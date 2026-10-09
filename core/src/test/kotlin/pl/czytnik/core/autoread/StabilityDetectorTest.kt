@@ -14,16 +14,16 @@ class StabilityDetectorTest {
         frames.map { (t, blocks) -> detector.update(blocks, t) }
 
     @Test
-    fun `same text for a second is stable`() {
-        val results = run((0..3).map { it * 350L to bubble })
-        assertEquals(listOf(false, false, false, true), results)
+    fun `same text for half a second is stable`() {
+        val results = run((0..2).map { it * 250L to bubble })
+        assertEquals(listOf(false, false, true), results)
     }
 
     @Test
     fun `text change restarts the window`() {
         val other = listOf(block("SOMETHING COMPLETELY DIFFERENT"))
-        val results = run(listOf(0L to bubble, 350L to bubble, 700L to other, 1050L to other, 1400L to other, 1750L to other))
-        assertEquals(listOf(false, false, false, false, false, true), results)
+        val results = run(listOf(0L to bubble, 250L to bubble, 500L to other, 750L to other, 1000L to other))
+        assertEquals(listOf(false, false, false, false, true), results)
     }
 
     @Test

@@ -6,8 +6,8 @@ package pl.czytnik.core.config
  * Czasy w milisekundach, progi podobieństwa w zakresie 0..1, położenia jako ułamek wymiaru kadru.
  */
 data class AutoReadConfig(
-    val analysisIntervalMs: Long = 350,
-    val stableWindowMs: Long = 1000,
+    val analysisIntervalMs: Long = 250,
+    val stableWindowMs: Long = 500,
     val stableMinFrames: Int = 3,
     val stableSimilarity: Double = 0.75,
     val maxCenterShift: Double = 0.08,
