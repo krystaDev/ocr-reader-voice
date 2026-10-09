@@ -26,6 +26,7 @@ section { padding: 56px 0; border-bottom: 1px solid var(--line); }
 .button { display: inline-flex; align-items: center; min-height: 60px; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; border: 3px solid var(--white); color: var(--white); }
 .button.primary { background: var(--yellow); border-color: var(--yellow); color: var(--black); }
 .badge { display: inline-block; margin-top: 16px; padding: 6px 12px; border: 2px dashed var(--yellow); border-radius: 8px; color: var(--yellow); font-size: 1rem; }
+.hero p.support { margin: 16px 0 0; color: var(--white); font-size: 1.1rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
 .card { border: 3px solid var(--white); border-radius: 12px; padding: 20px; }
 .card p { margin: 0; color: var(--muted); }
